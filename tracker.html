@@ -1,440 +1,505 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Friends İngilizce Takipçisi</title>
-    
-    <!-- 1. Tailwind CSS (Tasarım Motoru) -->
+    <title>LangTracker - Modern Series Learning</title>
+
+    <!-- 1. Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 2. React ve ReactDOM (Uygulama Motoru) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- 3. Babel (JSX Kodlarını Çevirici) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- 4. Lucide İkonları -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        
-        /* Kaydırma çubuğu özelleştirme */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    </style>
-</head>
-<body class="bg-slate-900 text-slate-200 selection:bg-rose-500 selection:text-white">
-
-    <!-- Uygulamanın çalışacağı kök element -->
-    <div id="root"></div>
-
-    <!-- REACT UYGULAMA KODLARI -->
-    <script type="text/babel">
-        
-        const { useState, useEffect } = React;
-
-        // --- VERİ YAPISI (Friends) ---
-        const INITIAL_SCHEDULE = [
-            { tour: 1, title: "1. Tur: Hikayeyi Keşfet", desc: "Önce TR altyazı ile konuyu anla, sonra EN altyazı ile kelimeleri yakala.", weeks: [
-                { week: 1, days: [{ d: "Pazartesi", b: 1, l: "TR" }, { d: "Salı", b: 2, l: "EN" }, { d: "Çarşamba", b: 3 }, { d: "Perşembe", b: 4, l: "TR" }, { d: "Cuma", b: 5, l: "EN" }, { d: "Cumartesi", b: 6 }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 2, days: [{ d: "Pazartesi", b: 7, l: "TR" }, { d: "Salı", b: 8, l: "EN" }, { d: "Çarşamba", b: 9 }, { d: "Perşembe", b: 10, l: "TR" }, { d: "Cuma", b: 11, l: "EN" }, { d: "Cumartesi", b: 12 }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 3, days: [{ d: "Pazartesi", b: 13, l: "TR" }, { d: "Salı", b: 14, l: "EN" }, { d: "Çarşamba", b: 15 }, { d: "Perşembe", b: 16, l: "TR" }, { d: "Cuma", b: 17, l: "EN" }, { d: "Cumartesi", b: 18 }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 4, days: [{ d: "Pazartesi", b: 19, l: "TR" }, { d: "Salı", b: 20, l: "EN" }, { d: "Çarşamba", b: 21 }, { d: "Perşembe", b: 22, l: "TR" }, { d: "Cuma", b: 23, l: "EN" }, { d: "Cumartesi", b: 24 }, { d: "Pazar", s: "Cümle tekrarları" }] },
-            ]},
-            { tour: 2, title: "2. Tur: Derinleşme", desc: "İngilizce altyazı ile başla, sonra altyazısız izleyerek kendini zorla.", weeks: [
-                { week: 5, days: [{ d: "Pazartesi", b: 1, l: "EN" }, { d: "Salı", b: 2 }, { d: "Çarşamba", b: 3, l: "TR" }, { d: "Perşembe", b: 4, l: "EN" }, { d: "Cuma", b: 5 }, { d: "Cumartesi", b: 6, l: "TR" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 6, days: [{ d: "Pazartesi", b: 7, l: "EN" }, { d: "Salı", b: 8 }, { d: "Çarşamba", b: 9, l: "TR" }, { d: "Perşembe", b: 10, l: "EN" }, { d: "Cuma", b: 11 }, { d: "Cumartesi", b: 12, l: "TR" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 7, days: [{ d: "Pazartesi", b: 13, l: "EN" }, { d: "Salı", b: 14 }, { d: "Çarşamba", b: 15, l: "TR" }, { d: "Perşembe", b: 16, l: "EN" }, { d: "Cuma", b: 17 }, { d: "Cumartesi", b: 18, l: "TR" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 8, days: [{ d: "Pazartesi", b: 19, l: "EN" }, { d: "Salı", b: 20 }, { d: "Çarşamba", b: 21, l: "TR" }, { d: "Perşembe", b: 22, l: "EN" }, { d: "Cuma", b: 23 }, { d: "Cumartesi", b: 24, l: "TR" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-            ]},
-            { tour: 3, title: "3. Tur: Pekiştirme", desc: "Öğrenilenleri tekrar et, eksik kalan kelimeleri tamamla.", weeks: [
-                { week: 9, days: [{ d: "Pazartesi", b: 1 }, { d: "Salı", b: 2, l: "TR" }, { d: "Çarşamba", b: 3, l: "EN" }, { d: "Perşembe", b: 4 }, { d: "Cuma", b: 5, l: "TR" }, { d: "Cumartesi", b: 6, l: "EN" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 10, days: [{ d: "Pazartesi", b: 7 }, { d: "Salı", b: 8, l: "TR" }, { d: "Çarşamba", b: 9, l: "EN" }, { d: "Perşembe", b: 10 }, { d: "Cuma", b: 11, l: "TR" }, { d: "Cumartesi", b: 12, l: "EN" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 11, days: [{ d: "Pazartesi", b: 13 }, { d: "Salı", b: 14, l: "TR" }, { d: "Çarşamba", b: 15, l: "EN" }, { d: "Perşembe", b: 16 }, { d: "Cuma", b: 17, l: "TR" }, { d: "Cumartesi", b: 18, l: "EN" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-                { week: 12, days: [{ d: "Pazartesi", b: 19 }, { d: "Salı", b: 20, l: "TR" }, { d: "Çarşamba", b: 21, l: "EN" }, { d: "Perşembe", b: 22 }, { d: "Cuma", b: 23, l: "TR" }, { d: "Cumartesi", b: 24, l: "EN" }, { d: "Pazar", s: "Cümle tekrarları" }] },
-            ]},
-            { tour: 4, title: "4. Tur: Ustalık (No Subs)", desc: "Tamamen altyazısız. Artık Friends ekibinden biri gibisin!", weeks: [
-                { week: 13, days: [{ d: "Pazartesi", b: 1 }, { d: "Salı", b: 2 }, { d: "Çarşamba", b: 3 }, { d: "Perşembe", b: 4 }, { d: "Cuma", b: 5 }, { d: "Cumartesi", b: 6 }, { d: "Pazar", s: "Tatil" }] },
-                { week: 14, days: [{ d: "Pazartesi", b: 7 }, { d: "Salı", b: 8 }, { d: "Çarşamba", b: 9 }, { d: "Perşembe", b: 10 }, { d: "Cuma", b: 11 }, { d: "Cumartesi", b: 12 }, { d: "Pazar", s: "Tatil" }] },
-                { week: 15, days: [{ d: "Pazartesi", b: 13 }, { d: "Salı", b: 14 }, { d: "Çarşamba", b: 15 }, { d: "Perşembe", b: 16 }, { d: "Cuma", b: 17 }, { d: "Cumartesi", b: 18 }, { d: "Pazar", s: "Tatil" }] },
-                { week: 16, days: [{ d: "Pazartesi", b: 19 }, { d: "Salı", b: 20 }, { d: "Çarşamba", b: 21 }, { d: "Perşembe", b: 22 }, { d: "Cuma", b: 23 }, { d: "Cumartesi", b: 24 }, { d: "Pazar", s: "Tatil" }] },
-            ]},
-        ];
-
-        const STORAGE_KEY = 'friendsTrackerPro_v1';
-
-        // --- UYGULAMA BİLEŞENİ ---
-        function App() {
-            const [completed, setCompleted] = useState({});
-            const [notes, setNotes] = useState({});
-            const [expandedTours, setExpandedTours] = useState([1]); 
-            const [showSettings, setShowSettings] = useState(false);
-            const [activeNote, setActiveNote] = useState(null); 
-            const [noteDraft, setNoteDraft] = useState("");
-            const [isLoaded, setIsLoaded] = useState(false);
-
-            // İkonları CDN üzerinden çekip render etmek için hook
-            useEffect(() => {
-                lucide.createIcons();
-            });
-
-            // Başlangıçta verileri yükle
-            useEffect(() => {
-                const savedData = localStorage.getItem(STORAGE_KEY);
-                if (savedData) {
-                    try {
-                        const parsed = JSON.parse(savedData);
-                        setCompleted(parsed.completed || {});
-                        setNotes(parsed.notes || {});
-                        
-                        if (parsed.completed) {
-                            const lastCompletedId = Object.keys(parsed.completed).pop();
-                            if (lastCompletedId) {
-                                const tourNum = parseInt(lastCompletedId.split('-')[0].replace('t', ''));
-                                setExpandedTours(prev => prev.includes(tourNum) ? prev : [...prev, tourNum]);
-                            }
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.1)',
+                            200: 'rgba(255, 255, 255, 0.2)',
+                            300: 'rgba(255, 255, 255, 0.3)',
+                            border: 'rgba(255, 255, 255, 0.1)',
                         }
-                    } catch (e) {
-                        console.error("Veri yükleme hatası", e);
+                    },
+                    backdropBlur: {
+                        xs: '2px',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'scale-in': 'scaleIn 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
                     }
                 }
-                setIsLoaded(true);
-            }, []);
+            }
+        }
+    </script>
 
-            // Değişiklik olduğunda kaydet
-            useEffect(() => {
-                if (isLoaded) {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed, notes }));
+    <!-- 2. React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- 3. Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 4. Icons & Fonts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- CONSTANTS & HELPERS ---
+        const SUT_VERSION = 'v2_multi_series';
+        const STORAGE_KEY = 'langTracker_db';
+
+        const DEFAULT_SCHEDULE_TEMPLATE = [
+            { tour: 1, title: "1. Tur: Keşif (TR/EN)", desc: "Önce Türkçe, sonra İngilizce altyazı. Hikayeyi anla, kelimeleri yakala.", method: "mixed" },
+            { tour: 2, title: "2. Tur: Derinleşme (EN)", desc: "Tamamen İngilizce altyazı. Bilmediğin kelimeleri not al.", method: "en" },
+            { tour: 3, title: "3. Tur: Odaklanma (TR/EN Mix)", desc: "Zor bölümleri tekrar et, pekiştir.", method: "mixed" },
+            { tour: 4, title: "4. Tur: Ustalık (No Subs)", desc: "Altyazısız izle. Gerçek hayat provası!", method: "none" }
+        ];
+
+        // Generate schedule based on total episodes
+        const generateSchedule = (totalEpisodes) => {
+            const weeksPerTour = 4; // Standardized duration
+            const daysPerWeek = 6;  // Study days
+
+            // For simplicity in this version, we stick to a fixed 16-week program (4 tours x 4 weeks)
+            // Ideally, episodes would be distributed mathematically, but we'll simulate a generic flow.
+
+            return DEFAULT_SCHEDULE_TEMPLATE.map(tour => {
+                const weeks = [];
+                for (let w = 1; w <= weeksPerTour; w++) {
+                    const weekNum = (tour.tour - 1) * weeksPerTour + w;
+                    const days = [
+                        { d: "Pazartesi", b: "X", l: tour.method === 'mixed' ? 'TR' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Salı", b: "X", l: tour.method === 'mixed' ? 'EN' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Çarşamba", b: "X", l: tour.method === 'mixed' ? 'TR' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Perşembe", b: "X", l: tour.method === 'mixed' ? 'EN' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Cuma", b: "X", l: tour.method === 'mixed' ? 'TR' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Cumartesi", b: "X", l: tour.method === 'mixed' ? 'EN' : tour.method === 'en' ? 'EN' : null },
+                        { d: "Pazar", s: "Tekrar & Dinlenme" }
+                    ];
+                    weeks.push({ week: weekNum, days });
                 }
-            }, [completed, notes, isLoaded]);
+                return { ...tour, weeks };
+            });
+        };
 
-            // --- FONKSİYONLAR ---
-            const toggleDay = (id) => {
-                setCompleted(prev => {
-                    const newState = { ...prev };
-                    if (newState[id]) delete newState[id];
-                    else newState[id] = true;
-                    return newState;
-                });
+        // --- COMPONENTS ---
+
+        // 1. Dashboard Series Card
+        const SeriesCard = ({ series, progress, onClick }) => {
+            const percent = Math.round((progress.completed / progress.total) * 100) || 0;
+
+            return (
+                <div onClick={onClick} className="glass-panel rounded-2xl p-6 cursor-pointer hover:bg-slate-800/50 transition-all duration-300 group relative overflow-hidden animate-slide-up">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-indigo-500/30"></div>
+
+                    <div className="relative z-10 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white shadow-lg">
+                                {series.title.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div className="glass-button px-3 py-1 rounded-full text-xs font-medium text-indigo-200">
+                                {percent}%
+                            </div>
+                        </div>
+
+                        <h3 className="text-xl font-display font-bold text-white mb-1 group-hover:text-indigo-300 transition-colors">{series.title}</h3>
+                        <p className="text-sm text-slate-400 mb-6">{progress.total} Bölüm Hedefi</p>
+
+                        <div className="mt-auto">
+                            <div className="w-full h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                                <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${percent}%` }}></div>
+                            </div>
+                            <div className="flex justify-between mt-2 text-xs text-slate-500">
+                                <span>İlerleme</span>
+                                <span>{progress.completed}/{progress.total}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 2. Add Series Modal
+        const AddSeriesModal = ({ isOpen, onClose, onAdd }) => {
+            const [title, setTitle] = useState("");
+            const [epCount, setEpCount] = useState("");
+
+            if (!isOpen) return null;
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (title && epCount) {
+                    onAdd({ title, totalEpisodes: parseInt(epCount) });
+                    setTitle("");
+                    setEpCount("");
+                    onClose();
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="glass-panel w-full max-w-md rounded-2xl p-8 animate-scale-in relative">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+                            <i data-lucide="x" width="24"></i>
+                        </button>
+
+                        <h2 className="text-2xl font-display font-bold text-white mb-6">Yeni Dizi İzlemeye Başla</h2>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-2">Dizi Adı</label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                    placeholder="Örn: The Office, Breaking Bad..."
+                                    value={title}
+                                    onChange={e => setTitle(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-slate-400 mb-2">Toplam Bölüm Sayısı (Tahmini)</label>
+                                <input
+                                    type="number"
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                                    placeholder="Örn: 201"
+                                    value={epCount}
+                                    onChange={e => setEpCount(e.target.value)}
+                                />
+                            </div>
+
+                            <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg shadow-lg shadow-indigo-600/20 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 mt-4">
+                                <i data-lucide="plus-circle" width="20"></i> Programı Oluştur
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. Series Detail View (Refactored Friends logic)
+        const SeriesDetail = ({ series, data, onBack, onUpdate }) => {
+            const [expandedTours, setExpandedTours] = useState([1]);
+
+            // Calculate Stats
+            const totalTasks = series.schedule.reduce((acc, t) => acc + t.weeks.reduce((wAcc, w) => wAcc + w.days.filter(d => d.b).length, 0), 0);
+            const completedTasks = Object.keys(data.completed || {}).length;
+            const percentage = Math.round((completedTasks / totalTasks) * 100) || 0;
+
+            const toggleDay = (dayId) => {
+                const newCompleted = { ...(data.completed || {}) };
+                if (newCompleted[dayId]) delete newCompleted[dayId];
+                else newCompleted[dayId] = true;
+                onUpdate(series.id, { completed: newCompleted });
             };
 
             const toggleTour = (tourNum) => {
-                setExpandedTours(prev => 
-                    prev.includes(tourNum) ? prev.filter(t => t !== tourNum) : [...prev, tourNum]
-                );
+                setExpandedTours(prev => prev.includes(tourNum) ? prev.filter(t => t !== tourNum) : [...prev, tourNum]);
             };
 
-            const openNoteModal = (id, title) => {
-                setActiveNote({ id, title });
-                setNoteDraft(notes[id] || "");
-            };
-
-            const saveNote = () => {
-                if (activeNote) {
-                    setNotes(prev => ({ ...prev, [activeNote.id]: noteDraft }));
-                    setActiveNote(null);
-                }
-            };
-
-            const deleteNote = () => {
-                if (activeNote) {
-                    const newNotes = { ...notes };
-                    delete newNotes[activeNote.id];
-                    setNotes(newNotes);
-                    setActiveNote(null);
-                }
-            }
-
-            const exportData = () => {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ completed, notes }));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "friends_progress_backup.json");
-                document.body.appendChild(downloadAnchorNode);
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-            };
-
-            const importData = (event) => {
-                const fileReader = new FileReader();
-                fileReader.readAsText(event.target.files[0], "UTF-8");
-                fileReader.onload = e => {
-                    try {
-                        const parsed = JSON.parse(e.target.result);
-                        if (parsed.completed) setCompleted(parsed.completed);
-                        if (parsed.notes) setNotes(parsed.notes);
-                        alert("Yedek başarıyla yüklendi!");
-                        setShowSettings(false);
-                    } catch (err) {
-                        alert("Dosya formatı hatalı.");
-                    }
-                };
-            };
-
-            const resetProgress = () => {
-                if (confirm("Tüm ilerlemeni ve notlarını silmek istediğine emin misin? Bu işlem geri alınamaz.")) {
-                    setCompleted({});
-                    setNotes({});
-                    localStorage.removeItem(STORAGE_KEY);
-                    setShowSettings(false);
-                }
-            };
-
-            // İstatistikler
-            const totalEpisodes = INITIAL_SCHEDULE.reduce((acc, tour) => 
-                acc + tour.weeks.reduce((wAcc, week) => 
-                wAcc + week.days.filter(d => d.b).length, 0), 0);
-            
-            const completedCount = Object.keys(completed).length;
-            const progressPercentage = Math.round((completedCount / totalEpisodes) * 100);
-
-            // --- RENDER ---
             return (
-                <div className="min-h-screen pb-20">
-                    
+                <div className="animate-fade-in pb-20">
                     {/* Header */}
-                    <header className="bg-slate-800/50 backdrop-blur-md sticky top-0 z-30 border-b border-slate-700 shadow-lg">
-                        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center shadow-lg shadow-yellow-400/20 text-slate-900 font-bold text-xl">
-                                    F•R
-                                </div>
-                                <div>
-                                    <h1 className="font-bold text-lg md:text-xl text-white tracking-tight">Language Tracker</h1>
-                                    <p className="text-xs text-slate-400">İngilizce Gelişim Sistemi</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                {/* Dairesel İlerleme */}
-                                <div className="flex items-center gap-3 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
-                                    <div className="relative w-10 h-10 flex items-center justify-center">
-                                        <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-700" />
-                                            <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="4" fill="transparent" 
-                                                    strokeDasharray={100} strokeDashoffset={100 - progressPercentage} 
-                                                    className="text-rose-500 transition-all duration-1000 ease-out" />
-                                        </svg>
-                                        <span className="absolute text-[10px] font-bold text-white">{progressPercentage}%</span>
+                    <div className="sticky top-0 z-30 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/5 mb-8">
+                        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center gap-4">
+                            <button onClick={onBack} className="glass-button p-2 rounded-lg text-slate-300 hover:text-white">
+                                <i data-lucide="arrow-left" width="20"></i>
+                            </button>
+                            <div className="flex-1">
+                                <h1 className="text-xl font-display font-bold text-white">{series.title}</h1>
+                                <div className="flex items-center gap-2 text-xs text-slate-400">
+                                    <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div className="h-full bg-indigo-500" style={{ width: `${percentage}%` }}></div>
                                     </div>
-                                    <div className="hidden md:block text-xs font-medium text-slate-300">
-                                        <span className="block text-white">{completedCount}/{totalEpisodes}</span>
-                                        <span className="text-slate-500">Bölüm Tamamlandı</span>
-                                    </div>
-                                </div>
-
-                                <button onClick={() => setShowSettings(true)} className="p-2 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white">
-                                    <i data-lucide="settings" width="20"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </header>
-
-                    {/* Ana İçerik */}
-                    <main className="max-w-5xl mx-auto px-4 py-8">
-                        
-                        {/* Motivasyon Kartı */}
-                        <div className="bg-gradient-to-r from-indigo-900 to-slate-800 rounded-2xl p-6 mb-8 border border-slate-700 shadow-xl relative overflow-hidden">
-                            <i data-lucide="video" className="absolute top-4 right-4 text-white opacity-10 w-32 h-32"></i>
-                            <div className="relative z-10">
-                                <h2 className="text-2xl font-bold text-white mb-2">Hoşgeldin! 👋</h2>
-                                <p className="text-indigo-200 max-w-xl text-sm">
-                                    Dil öğrenme maratonunda disiplin her şeydir. Her gün işaretlediğin bir kutucuk, seni akıcı İngilizceye bir adım daha yaklaştırır. 
-                                </p>
-                                <div className="flex gap-2 mt-4 text-xs font-semibold">
-                                    <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded border border-yellow-500/30">TR: Türkçe Altyazı</span>
-                                    <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded border border-green-500/20">EN: İngilizce Altyazı</span>
-                                    <span className="bg-slate-600/30 text-slate-300 px-2 py-1 rounded border border-slate-600">Altyazısız</span>
+                                    <span>%{percentage} Tamamlandı</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Turlar */}
-                        <div className="space-y-6">
-                            {INITIAL_SCHEDULE.map((tourData) => {
-                                const isExpanded = expandedTours.includes(tourData.tour);
-                                
-                                let tourTotal = 0;
-                                let tourCompleted = 0;
-                                tourData.weeks.forEach(w => w.days.forEach(d => {
-                                    if(d.b) {
-                                        tourTotal++;
-                                        if(completed[`t${tourData.tour}-w${w.week}-d${w.days.indexOf(d)}`]) tourCompleted++;
-                                    }
-                                }));
-                                const tourPercent = tourTotal > 0 ? Math.round((tourCompleted/tourTotal)*100) : 0;
+                    <div className="max-w-5xl mx-auto px-4 space-y-4">
+                        {series.schedule.map(tour => {
+                            const isExpanded = expandedTours.includes(tour.tour);
+                            // Tour stats
+                            let tTotal = 0, tDone = 0;
+                            tour.weeks.forEach(w => w.days.forEach(d => {
+                                if (d.b) {
+                                    tTotal++;
+                                    if (data.completed?.[`t${tour.tour}-w${w.week}-d${w.days.indexOf(d)}`]) tDone++;
+                                }
+                            }));
+                            const tPercent = tTotal > 0 ? Math.round((tDone / tTotal) * 100) : 0;
 
-                                return (
-                                <section key={tourData.tour} className={`rounded-xl overflow-hidden border transition-all duration-300 ${isExpanded ? 'bg-slate-800/40 border-slate-700' : 'bg-slate-800 border-transparent hover:border-slate-600'}`}>
-                                    <button onClick={() => toggleTour(tourData.tour)} className="w-full flex items-center justify-between p-5 text-left focus:outline-none">
+                            return (
+                                <div key={tour.tour} className={`glass-panel rounded-xl overflow-hidden transition-all duration-300 ${isExpanded ? 'bg-slate-800/60' : ''}`}>
+                                    <button onClick={() => toggleTour(tour.tour)} className="w-full flex items-center justify-between p-5 text-left">
                                         <div className="flex items-center gap-4">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${tourPercent === 100 ? 'bg-green-500 text-slate-900' : 'bg-slate-700 text-slate-300'}`}>
-                                                {tourPercent === 100 ? <i data-lucide="check" width="16"></i> : tourData.tour}
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-colors ${tPercent === 100 ? 'bg-green-500/20 text-green-400' : 'bg-slate-700/50 text-slate-300'}`}>
+                                                {tPercent === 100 ? <i data-lucide="check" width="18"></i> : tour.tour}
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-white">{tourData.title}</h3>
-                                                <p className="text-sm text-slate-400">{tourData.desc}</p>
+                                                <h3 className="text-lg font-bold text-white">{tour.title}</h3>
+                                                <p className="text-sm text-slate-400">{tour.desc}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <div className="hidden sm:block w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
-                                                <div className="h-full bg-indigo-500 transition-all duration-500" style={{width: `${tourPercent}%`}}></div>
-                                            </div>
-                                            <span className="text-sm font-mono text-indigo-400 w-10 text-right">{tourPercent}%</span>
-                                            <i data-lucide={isExpanded ? "chevron-down" : "chevron-right"} className="text-slate-500" width="20"></i>
+                                            <span className="text-sm font-mono text-indigo-300">{tPercent}%</span>
+                                            <i data-lucide={isExpanded ? "chevron-down" : "chevron-right"} className="text-slate-500"></i>
                                         </div>
                                     </button>
 
                                     {isExpanded && (
-                                    <div className="p-5 pt-0 border-t border-slate-700/50">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                                            {tourData.weeks.map((week) => (
-                                                <div key={week.week} className="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50 hover:border-indigo-500/30 transition-colors">
-                                                    <h4 className="text-sm font-bold text-slate-300 mb-3 flex justify-between items-center">
-                                                        <span>{week.week}. Hafta</span>
-                                                        <span className="text-xs font-normal text-slate-500">
-                                                            {week.days.filter(d => d.b && completed[`t${tourData.tour}-w${week.week}-d${week.days.indexOf(d)}`]).length}/{week.days.filter(d=>d.b).length}
-                                                        </span>
-                                                    </h4>
-                                                    
-                                                    <div className="space-y-2">
-                                                        {week.days.map((day, dIndex) => {
-                                                            const id = `t${tourData.tour}-w${week.week}-d${dIndex}`;
-                                                            const isChecked = completed[id] || false;
-                                                            const hasNote = notes[id] && notes[id].length > 0;
+                                        <div className="border-t border-white/5 p-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                                {tour.weeks.map(week => (
+                                                    <div key={week.week} className="bg-slate-900/30 rounded-lg p-3 border border-white/5 hover:border-indigo-500/30 transition-colors">
+                                                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 px-1">{week.week}. Hafta</h4>
+                                                        <div className="space-y-1.5">
+                                                            {week.days.map((day, dIdx) => {
+                                                                if (!day.b) return null; // Skip rest days for cleaner list in this view
 
-                                                            if (!day.b) {
+                                                                const id = `t${tour.tour}-w${week.week}-d${dIdx}`;
+                                                                const isChecked = data.completed?.[id];
+
                                                                 return (
-                                                                    <div key={dIndex} className="text-xs text-slate-500 py-1 px-2 bg-slate-800/50 rounded flex justify-between items-center italic">
-                                                                        <span>{day.d}</span>
-                                                                        <span>{day.s}</span>
-                                                                    </div>
-                                                                );
-                                                            }
+                                                                    <div key={dIdx}
+                                                                        onClick={() => toggleDay(id)}
+                                                                        className={`group flex items-center p-2 rounded-lg cursor-pointer transition-all ${isChecked ? 'bg-indigo-500/10' : 'hover:bg-white/5'}`}>
 
-                                                            return (
-                                                                <div key={dIndex} className={`group flex items-center justify-between p-2 rounded transition-colors ${isChecked ? 'bg-indigo-900/20' : 'bg-slate-800 hover:bg-slate-750'}`}>
-                                                                    <label className="flex items-center flex-1 cursor-pointer gap-3 min-w-0">
-                                                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isChecked ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-slate-600 bg-slate-900'}`}>
-                                                                            {isChecked && <i data-lucide="check" width="12"></i>}
+                                                                        <div className={`w-4 h-4 rounded border mr-3 flex items-center justify-center transition-all ${isChecked ? 'bg-indigo-500 border-indigo-500' : 'border-slate-600'}`}>
+                                                                            {isChecked && <i data-lucide="check" width="10" className="text-white"></i>}
                                                                         </div>
-                                                                        <input type="checkbox" className="hidden" checked={isChecked} onChange={() => toggleDay(id)} />
-                                                                        <div className={`flex flex-col min-w-0 ${isChecked ? 'opacity-50' : ''}`}>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <span className="text-sm font-medium truncate">{day.d}</span>
-                                                                                <span className="text-xs text-slate-500 whitespace-nowrap">{day.b}. Bölüm</span>
+
+                                                                        <div className="flex-1">
+                                                                            <div className="flex justify-between items-center text-sm">
+                                                                                <span className={isChecked ? 'text-indigo-200 line-through' : 'text-slate-300'}>{day.d}</span>
+                                                                                {day.l && <span className={`text-[10px] font-bold px-1.5 rounded ${day.l === 'EN' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>{day.l}</span>}
                                                                             </div>
                                                                         </div>
-                                                                    </label>
-                                                                    
-                                                                    <div className="flex items-center gap-1 pl-2">
-                                                                        {day.l && (
-                                                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                                                                day.l === 'TR' ? 'bg-yellow-500/10 text-yellow-500' :
-                                                                                day.l === 'EN' ? 'bg-green-500/10 text-green-500' : 
-                                                                                'bg-slate-500/10 text-slate-400'
-                                                                            }`}>{day.l}</span>
-                                                                        )}
-                                                                        <button onClick={(e) => { e.stopPropagation(); openNoteModal(id, `${tourData.tour}. Tur - ${day.b}. Bölüm Notları`); }}
-                                                                            className={`p-1.5 rounded-md transition-colors ${hasNote ? 'text-amber-400 bg-amber-400/10' : 'text-slate-600 hover:text-slate-300 hover:bg-slate-700'}`}
-                                                                            title="Kelime Notu Al">
-                                                                            <i data-lucide="book-open" width="14"></i>
-                                                                        </button>
                                                                     </div>
-                                                                </div>
-                                                            );
-                                                        })}
+                                                                )
+                                                            })}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
                                     )}
-                                </section>
-                                );
-                            })}
-                        </div>
-                    </main>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
 
-                    {/* Not Modal */}
-                    {activeNote && (
-                        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                            <div className="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-xl shadow-2xl p-6 transform transition-all scale-100">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <i data-lucide="edit-3" width="20" className="text-indigo-400"></i>
-                                        {activeNote.title}
-                                    </h3>
-                                    <button onClick={() => setActiveNote(null)} className="text-slate-400 hover:text-white"><i data-lucide="x" width="24"></i></button>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block text-sm text-slate-400 mb-2">Bu bölümden öğrendiğin kelimeler veya cümleler:</label>
-                                    <textarea className="w-full h-48 bg-slate-900 border border-slate-700 rounded-lg p-4 text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none font-mono text-sm leading-relaxed"
-                                        placeholder="- Pivot: Dönmek (Friends classic!)&#10;- We were on a break: Ara vermiştik"
-                                        value={noteDraft}
-                                        onChange={(e) => setNoteDraft(e.target.value)}></textarea>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <button onClick={deleteNote} className="flex items-center gap-2 text-rose-400 hover:text-rose-300 px-4 py-2 rounded transition-colors text-sm">
-                                        {notes[activeNote.id] ? <><i data-lucide="trash-2" width="16"></i> Notu Sil</> : <span></span>}
-                                    </button>
-                                    <div className="flex gap-3">
-                                        <button onClick={() => setActiveNote(null)} className="px-4 py-2 text-slate-300 hover:text-white text-sm">İptal</button>
-                                        <button onClick={saveNote} className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
-                                            <i data-lucide="check" width="18"></i> Kaydet
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+        // --- MAIN APP ---
+        function App() {
+            const [db, setDb] = useState({ series: [], userData: {} });
+            const [activeSeriesId, setActiveSeriesId] = useState(null);
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [isLoading, setIsLoading] = useState(true);
 
-                    {/* Ayarlar Modal */}
-                    {showSettings && (
-                        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-                            <div className="bg-slate-800 border border-slate-700 w-full max-w-md rounded-2xl p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-bold text-white">Ayarlar</h3>
-                                    <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-white"><i data-lucide="x" width="24"></i></button>
-                                </div>
-                                
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
-                                            <i data-lucide="download" width="16"></i> Veri Yedekleme
-                                        </h4>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <button onClick={exportData} className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg text-sm transition-colors border border-slate-600">
-                                                <i data-lucide="download" width="16"></i> İndir (JSON)
-                                            </button>
-                                            <label className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-lg text-sm transition-colors cursor-pointer border border-slate-600">
-                                                <i data-lucide="upload" width="16"></i> Yükle
-                                                <input type="file" onChange={importData} accept=".json" className="hidden"/>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div className="pt-6 border-t border-slate-700">
-                                        <button onClick={resetProgress} className="w-full bg-rose-900/30 hover:bg-rose-900/50 text-rose-400 border border-rose-900/50 py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
-                                            <i data-lucide="trash-2" width="16"></i> Tüm İlerlemeyi Sıfırla
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+            // Init & Migration Logic
+            useEffect(() => {
+                const loadData = () => {
+                    const savedV2 = localStorage.getItem(STORAGE_KEY);
+                    if (savedV2) {
+                        setDb(JSON.parse(savedV2));
+                    } else {
+                        // Check for V1 data migration
+                        const savedV1 = localStorage.getItem('friendsTrackerPro_v1');
+                        if (savedV1) {
+                            try {
+                                const parsedV1 = JSON.parse(savedV1);
+                                const friendsSeries = {
+                                    id: 'friends',
+                                    title: 'Friends',
+                                    schedule: generateSchedule(236) // Friends approx episodes
+                                };
+                                const newDb = {
+                                    series: [friendsSeries],
+                                    userData: {
+                                        'friends': { completed: parsedV1.completed || {}, notes: parsedV1.notes || {} }
+                                    }
+                                };
+                                setDb(newDb);
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(newDb));
+                            } catch (e) { console.error("Migration failed", e); }
+                        }
+                    }
+                    setIsLoading(false);
+                    lucide.createIcons();
+                };
+                loadData();
+            }, []);
+
+            useEffect(() => {
+                if (!isLoading) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                    lucide.createIcons(); // Re-init icons on updates
+                }
+            }, [db, isLoading, activeSeriesId]);
+
+            const handleSeriesAdd = ({ title, totalEpisodes }) => {
+                const newId = Date.now().toString();
+                const newSeries = {
+                    id: newId,
+                    title,
+                    schedule: generateSchedule(totalEpisodes)
+                };
+                setDb(prev => ({
+                    ...prev,
+                    series: [...prev.series, newSeries],
+                    userData: { ...prev.userData, [newId]: { completed: {}, notes: {} } }
+                }));
+            };
+
+            const handleUpdate = (seriesId, newData) => {
+                setDb(prev => ({
+                    ...prev,
+                    userData: {
+                        ...prev.userData,
+                        [seriesId]: { ...prev.userData[seriesId], ...newData }
+                    }
+                }));
+            };
+
+            if (isLoading) return <div className="min-h-screen flex items-center justify-center text-white">Yükleniyor...</div>;
+
+            // VIEW: DETAIL
+            if (activeSeriesId) {
+                const series = db.series.find(s => s.id === activeSeriesId);
+                const data = db.userData[activeSeriesId] || {};
+                return <SeriesDetail series={series} data={data} onBack={() => setActiveSeriesId(null)} onUpdate={handleUpdate} />;
+            }
+
+            // VIEW: DASHBOARD
+            return (
+                <div className="max-w-6xl mx-auto px-6 py-10 animate-fade-in">
+                    <header className="flex justify-between items-end mb-12">
+                        <div>
+                            <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2">Serüvenlerim</h1>
+                            <p className="text-slate-400">Öğrenme yolculuğuna devam et veya yeni bir başlangıç yap.</p>
                         </div>
-                    )}
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-indigo-600/25 transition-all transform hover:scale-105 flex items-center gap-2">
+                            <i data-lucide="plus" width="20"></i>
+                            <span className="hidden md:inline">Yeni Dizi Ekle</span>
+                        </button>
+                    </header>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {db.series.map(series => (
+                            <SeriesCard
+                                key={series.id}
+                                series={series}
+                                progress={{
+                                    completed: Object.keys(db.userData[series.id]?.completed || {}).length,
+                                    total: series.schedule.reduce((acc, t) => acc + t.weeks.reduce((wa, w) => wa + w.days.filter(d => d.b).length, 0), 0)
+                                }}
+                                onClick={() => setActiveSeriesId(series.id)}
+                            />
+                        ))}
+
+                        {db.series.length === 0 && (
+                            <div className="col-span-full py-20 text-center border-2 border-dashed border-slate-700 rounded-3xl">
+                                <i data-lucide="film" width="48" className="mx-auto text-slate-600 mb-4"></i>
+                                <h3 className="text-xl text-slate-300 font-medium">Henüz bir dizi eklemedin</h3>
+                                <p className="text-slate-500 mt-2">Sağ üstteki butondan ilk dizini ekle!</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onAdd={handleSeriesAdd} />
                 </div>
             );
         }
 
-        // UYGULAMAYI BAŞLAT
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
+
 </html>
