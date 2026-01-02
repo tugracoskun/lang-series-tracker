@@ -1,6 +1,6 @@
-import { LayoutDashboard, BookOpen, Settings, User, X, Database } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, User, X, Database, Zap } from 'lucide-react';
 
-const Sidebar = ({ isOpen, onClose }) => {
+const Sidebar = ({ isOpen, onClose, onNavigate, activeView }) => {
     return (
         <>
             {/* Overlay */}
@@ -34,10 +34,38 @@ const Sidebar = ({ isOpen, onClose }) => {
                         </div>
                     </div>
 
-                    <MenuLink icon={<LayoutDashboard size={20} />} label="Dashboard" active />
-                    <MenuLink icon={<BookOpen size={20} />} label="Flashcards" badge="Yakında" />
-                    <MenuLink icon={<Database size={20} />} label="Veri Yöneticisi" badge="Yakında" />
-                    <MenuLink icon={<Settings size={20} />} label="Ayarlar" />
+                    <MenuLink
+                        icon={<LayoutDashboard size={20} />}
+                        label="Dashboard"
+                        active={activeView === 'dashboard'}
+                        onClick={() => onNavigate('dashboard')}
+                    />
+                    <MenuLink
+                        icon={<BookOpen size={20} />}
+                        label="Kelimelerim"
+                        badge="Yeni"
+                        active={activeView === 'vocab'}
+                        onClick={() => onNavigate('vocab')}
+                    />
+                    <MenuLink
+                        icon={<Zap size={20} />} // Changed icon to Zap for Flashcards
+                        label="Flashcards"
+                        active={activeView === 'flashcards'}
+                        onClick={() => onNavigate('flashcards')}
+                    />
+                    <MenuLink
+                        icon={<Database size={20} />}
+                        label="Veri Yöneticisi"
+                        badge="Yakında"
+                        active={activeView === 'data-manager'}
+                        onClick={() => onNavigate('data-manager')}
+                    />
+                    <MenuLink
+                        icon={<Settings size={20} />}
+                        label="Ayarlar"
+                        active={activeView === 'settings'}
+                        onClick={() => onNavigate('settings')}
+                    />
 
                 </div>
 
@@ -50,8 +78,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     );
 };
 
-const MenuLink = ({ icon, label, badge, active }) => (
-    <button className={`w-full flex items-center justify-between p-4 rounded-xl transition-all group ${active ? 'bg-white/5 text-white border border-white/5' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}>
+const MenuLink = ({ icon, label, badge, active, onClick }) => (
+    <button onClick={onClick} className={`w-full flex items-center justify-between p-4 rounded-xl transition-all group ${active ? 'bg-white/5 text-white border border-white/5' : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'}`}>
         <div className="flex items-center gap-4">
             <span className={active ? "text-indigo-400" : "text-slate-500 group-hover:text-white transition-colors"}>{icon}</span>
             <span className="font-medium">{label}</span>

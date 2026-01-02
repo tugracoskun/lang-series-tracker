@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Database, X } from 'lucide-react';
+import { Plus, Trash2, Database, X, Menu } from 'lucide-react';
 import SeriesDetail from './components/SeriesDetail';
+import Sidebar from './components/Sidebar';
+import VocabularyPage from './components/VocabularyPage';
+import FlashcardsPage from './components/FlashcardsPage';
 import { TVMazeService } from './services/TVMazeService';
 import { generateSeasonSchedule } from './utils/schedule';
 
@@ -85,8 +88,10 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
 function App() {
     const [db, setDb] = useState({ series: [], userData: {} });
     const [activeSeriesId, setActiveSeriesId] = useState(null);
+    const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'vocab', 'settings'
     const [showAddModal, setShowAddModal] = useState(false);
     const [loadingState, setLoadingState] = useState(null);
+    const [isSidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -146,9 +151,21 @@ function App() {
         }
     };
 
+    const navigateTo = (view) => {
+        setActiveView(view);
+        setActiveSeriesId(null);
+        setSidebarOpen(false);
+    };
+
     return (
         <div className="min-h-screen text-slate-200 font-sans">
             {loadingState && <CinematicLoader status={loadingState} />}
+            <Sidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                onNavigate={navigateTo}
+                activeView={activeView}
+            />
 
             {activeSeriesId ? (
                 <SeriesDetail
@@ -157,8 +174,22 @@ function App() {
                     onBack={() => setActiveSeriesId(null)}
                     onUpdate={handleUpdate}
                 />
+            ) : activeView === 'vocab' ? (
+                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                    <VocabularyPage db={db} onBack={() => setActiveView('dashboard')} />
+                </div>
+            ) : activeView === 'flashcards' ? (
+                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                    <FlashcardsPage onBack={() => setActiveView('dashboard')} />
+                </div>
             ) : (
                 <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                    <div className="absolute top-6 right-6 z-50">
+                        <button onClick={() => setSidebarOpen(true)} className="p-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-all">
+                            <Menu size={24} />
+                        </button>
+                    </div>
+
                     <div className="cinematic-bg" style={{
                         backgroundImage: db.series[0]?.image?.original ? `url(${db.series[0].image.original})` : 'none',
                         opacity: 0.2

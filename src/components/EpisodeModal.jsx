@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, Circle, Plus, Trash, Lock } from 'lucide-react';
+import { X, CheckCircle2, Circle, Plus, Trash, Lock, Search, Loader2 } from 'lucide-react';
+import { DictionaryService } from '../services/DictionaryService';
 
 const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpdateVocab }) => {
     const [word, setWord] = useState("");
     const [meaning, setMeaning] = useState("");
+    const [isLoadingMeaning, setIsLoadingMeaning] = useState(false);
 
     if (!isOpen || !episode) return null;
 
     const vocabList = data.vocabulary?.[episode.id] || [];
     const isWatched = data.completed?.[context.id];
+
+    const handleLookup = async () => {
+        if (!word.trim()) return;
+        setIsLoadingMeaning(true);
+        const def = await DictionaryService.lookup(word);
+        if (def) setMeaning(def);
+        setIsLoadingMeaning(false);
+    };
 
     const handleAddVocab = () => {
         if (!word.trim() || !meaning.trim()) return;
@@ -89,22 +99,31 @@ const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpd
                         </div>
 
                         <div className="bg-black/20 rounded-xl p-4 border border-white/5 mb-4">
-                            <div className="flex gap-2">
-                                <input
-                                    className="flex-1 bg-transparent border-b border-slate-700 py-2 px-2 text-sm text-white focus:border-indigo-500 outline-none placeholder:text-slate-600 transition-colors"
-                                    placeholder="Kelime"
-                                    value={word}
-                                    onChange={e => setWord(e.target.value)}
-                                />
-                                <input
-                                    className="flex-1 bg-transparent border-b border-slate-700 py-2 px-2 text-sm text-white focus:border-indigo-500 outline-none placeholder:text-slate-600 transition-colors"
-                                    placeholder="Anlamı"
-                                    value={meaning}
-                                    onChange={e => setMeaning(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleAddVocab()}
-                                />
-                                <button onClick={handleAddVocab} className="bg-indigo-500 hover:bg-indigo-600 text-white p-2 rounded-lg transition-colors">
-                                    <Plus size={18} />
+                            <div className="flex gap-2 items-start">
+                                <div className="flex-1 space-y-2">
+                                    <div className="relative">
+                                        <input
+                                            className="w-full bg-transparent border-b border-slate-700 py-2 pl-2 pr-8 text-sm text-white focus:border-indigo-500 outline-none placeholder:text-slate-600 transition-colors"
+                                            placeholder="Kelime (örn. Distinct)"
+                                            value={word}
+                                            onChange={e => setWord(e.target.value)}
+                                            onBlur={handleLookup}
+                                            onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                                        />
+                                        <div className="absolute right-2 top-2 text-slate-500">
+                                            {isLoadingMeaning ? <Loader2 size={16} className="animate-spin text-indigo-500" /> : <Search size={16} />}
+                                        </div>
+                                    </div>
+                                    <input
+                                        className="w-full bg-transparent border-b border-slate-700 py-2 px-2 text-sm text-white focus:border-indigo-500 outline-none placeholder:text-slate-600 transition-colors"
+                                        placeholder="Anlamı (Otomatik gelir)"
+                                        value={meaning}
+                                        onChange={e => setMeaning(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleAddVocab()}
+                                    />
+                                </div>
+                                <button onClick={handleAddVocab} className="bg-indigo-500 hover:bg-indigo-600 text-white p-3 rounded-lg transition-colors h-full flex items-center justify-center">
+                                    <Plus size={20} />
                                 </button>
                             </div>
                         </div>
