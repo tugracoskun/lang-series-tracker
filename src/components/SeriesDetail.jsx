@@ -85,7 +85,7 @@ const SeriesDetail = ({ series, data, onBack, onUpdate }) => {
                             <div className="flex-1 max-w-xl">
                                 <div className="flex items-baseline gap-4 mb-2">
                                     <h1 className="text-2xl font-display font-bold text-white tracking-tight">{series.name}</h1>
-                                    <span className="text-xs font-mono text-indigo-400">%{percentage} TAMAMLANDI</span>
+                                    <span className="text-xs font-sans font-medium text-indigo-400 tracking-wide">%{percentage} TAMAMLANDI</span>
                                 </div>
 
                                 {/* Thin Progress Bar */}
@@ -96,7 +96,7 @@ const SeriesDetail = ({ series, data, onBack, onUpdate }) => {
                                     ></div>
                                 </div>
 
-                                <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 mt-2">
+                                <div className="flex items-center gap-3 text-[10px] font-sans font-medium text-slate-400 mt-2 tracking-wide">
                                     <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10">{series.episodes.length} BÖLÜM</span>
                                     <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10">{series.schedule.length} SEZON</span>
                                 </div>
@@ -161,7 +161,7 @@ const SeriesDetail = ({ series, data, onBack, onUpdate }) => {
                                         </div>
 
                                         <div className="p-6 animate-fade-in" key={activeTour}>
-                                            <div className="mb-6 flex items-center gap-2 text-xs font-mono text-indigo-400 bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20 inline-block">
+                                            <div className="mb-6 flex items-center gap-2 text-xs font-sans font-medium text-indigo-300 bg-indigo-500/10 p-3 rounded-lg border border-indigo-500/20 inline-block tracking-wide">
                                                 <Info size={14} />
                                                 ROTASYON: {currentTourData.pattern}
                                             </div>
