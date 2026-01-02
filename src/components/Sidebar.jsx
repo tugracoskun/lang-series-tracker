@@ -1,5 +1,4 @@
-import React from 'react';
-import { LayoutDashboard, BookOpen, Settings, User, X } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, User, X, Database } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
     return (
@@ -37,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
                     <MenuLink icon={<LayoutDashboard size={20} />} label="Dashboard" active />
                     <MenuLink icon={<BookOpen size={20} />} label="Flashcards" badge="Yakında" />
+                    <MenuLink icon={<Database size={20} />} label="Veri Yöneticisi" badge="Yakında" />
                     <MenuLink icon={<Settings size={20} />} label="Ayarlar" />
 
                 </div>
