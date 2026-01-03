@@ -9,6 +9,7 @@ import LoadingScreen from './components/LoadingScreen';
 import ConfirmationModal from './components/ConfirmationModal';
 import WatchlistPage from './components/WatchlistPage';
 import NotesPage from './components/NotesPage';
+import ActivityHistoryPage from './components/ActivityHistoryPage';
 import { TVMazeService } from './services/TVMazeService';
 import RecommendationsSection from './components/RecommendationsSection';
 import { generateSeasonSchedule } from './utils/schedule';
@@ -325,6 +326,11 @@ function App() {
                     onStartWatching={handleStartWatching}
                     onRemove={removeFromWatchlist}
                     onAddClick={() => setShowAddModal(true)}
+                />
+            ) : activeView === 'activity_history' ? (
+                <ActivityHistoryPage
+                    history={db.history}
+                    onBack={() => setActiveView('dashboard')}
                 />
             ) : (
                 <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">

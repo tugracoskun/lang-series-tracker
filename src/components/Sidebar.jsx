@@ -223,21 +223,33 @@ const Sidebar = ({ isOpen, onClose, onNavigate, activeView, history }) => {
                                         </h3>
                                         <div className="space-y-3">
                                             {history && history.length > 0 ? (
-                                                history.slice(0, 5).map(log => (
-                                                    <div key={log.id} className="flex gap-3 items-start group">
-                                                        <div className="mt-1 p-1 rounded-full bg-white/5 border border-white/5 group-hover:border-white/10 transition-colors">
-                                                            {getActionIcon(log.type)}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="text-xs text-slate-300 leading-relaxed font-medium">
-                                                                {log.description}
+                                                <>
+                                                    {history.slice(0, 3).map(log => (
+                                                        <div key={log.id} className="flex gap-3 items-start group">
+                                                            <div className="mt-1 p-1 rounded-full bg-white/5 border border-white/5 group-hover:border-white/10 transition-colors">
+                                                                {getActionIcon(log.type)}
                                                             </div>
-                                                            <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                                                {getRelativeTime(log.timestamp)}
+                                                            <div className="flex-1">
+                                                                <div className="text-xs text-slate-300 leading-relaxed font-medium">
+                                                                    {log.description}
+                                                                </div>
+                                                                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                                                    {getRelativeTime(log.timestamp)}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                ))
+                                                    ))}
+
+                                                    {history.length > 3 && (
+                                                        <button
+                                                            onClick={() => onNavigate('activity_history')}
+                                                            className="w-full mt-4 py-2 text-xs font-bold text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-transparent hover:border-white/10 flex items-center justify-center gap-2"
+                                                        >
+                                                            <Clock size={12} />
+                                                            TÜMÜNÜ GÖR ({history.length})
+                                                        </button>
+                                                    )}
+                                                </>
                                             ) : (
                                                 <div className="text-xs text-slate-600 italic pl-1">
                                                     Henüz aktivite kaydı yok.
