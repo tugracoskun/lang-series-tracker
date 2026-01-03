@@ -1,8 +1,8 @@
 import { useRef, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Settings, User, X, Database, Zap, Sparkles } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, User, X, Database, Zap, Sparkles, Clock, Activity, PlusCircle, Trash2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Sidebar = ({ isOpen, onClose, onNavigate, activeView }) => {
+const Sidebar = ({ isOpen, onClose, onNavigate, activeView, history }) => {
     // Close on escape key
     useEffect(() => {
         const handleEsc = (e) => {
@@ -55,6 +55,26 @@ const Sidebar = ({ isOpen, onClose, onNavigate, activeView }) => {
     const itemVariants = {
         hidden: { x: 20, opacity: 0 },
         visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    };
+
+    const getRelativeTime = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) return "Az önce";
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}dk önce`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}s önce`;
+        return `${Math.floor(diffInSeconds / 86400)}g önce`;
+    };
+
+    const getActionIcon = (type) => {
+        switch (type) {
+            case 'ADD': return <PlusCircle size={12} className="text-emerald-400" />;
+            case 'DELETE': return <Trash2 size={12} className="text-rose-400" />;
+            case 'WATCH': return <CheckCircle size={12} className="text-indigo-400" />;
+            default: return <Activity size={12} className="text-slate-400" />;
+        }
     };
 
     return (
@@ -180,6 +200,37 @@ const Sidebar = ({ isOpen, onClose, onNavigate, activeView }) => {
                                             variants={itemVariants}
                                         />
                                     </motion.div>
+
+                                    {/* Recent Activity Section */}
+                                    <motion.div variants={itemVariants} className="pt-6 border-t border-white/5">
+                                        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                            <Clock size={12} />
+                                            Son Aktiviteler
+                                        </h3>
+                                        <div className="space-y-3">
+                                            {history && history.length > 0 ? (
+                                                history.slice(0, 5).map(log => (
+                                                    <div key={log.id} className="flex gap-3 items-start group">
+                                                        <div className="mt-1 p-1 rounded-full bg-white/5 border border-white/5 group-hover:border-white/10 transition-colors">
+                                                            {getActionIcon(log.type)}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="text-xs text-slate-300 leading-relaxed font-medium">
+                                                                {log.description}
+                                                            </div>
+                                                            <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                                                {getRelativeTime(log.timestamp)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-xs text-slate-600 italic pl-1">
+                                                    Henüz aktivite kaydı yok.
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
                                 </motion.div>
                             </div>
 
@@ -210,8 +261,8 @@ const MenuLink = ({ icon, label, badge, active, onClick, variants }) => (
         whileHover={{ x: 5 }}
         whileTap={{ scale: 0.98 }}
         className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active
-                ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white border border-indigo-500/30'
-                : 'text-slate-400 hover:text-white border border-transparent hover:bg-white/5'
+            ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-white border border-indigo-500/30'
+            : 'text-slate-400 hover:text-white border border-transparent hover:bg-white/5'
             }`}
     >
         {active && (
@@ -234,8 +285,8 @@ const MenuLink = ({ icon, label, badge, active, onClick, variants }) => (
 
         {badge && (
             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border relative z-10 ${active
-                    ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
-                    : 'bg-white/5 text-slate-500 border-white/5 group-hover:border-white/10'
+                ? 'bg-indigo-500 text-white border-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+                : 'bg-white/5 text-slate-500 border-white/5 group-hover:border-white/10'
                 }`}>
                 {badge}
             </span>

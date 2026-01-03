@@ -71,9 +71,9 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
 };
 
 function App() {
-    const [db, setDb] = useState({ series: [], userData: {} });
+    const [db, setDb] = useState({ series: [], userData: {}, history: [] }); // Added history
     const [activeSeriesId, setActiveSeriesId] = useState(null);
-    const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'vocab', 'settings'
+    const [activeView, setActiveView] = useState('dashboard');
     const [showAddModal, setShowAddModal] = useState(false);
     const [loadingState, setLoadingState] = useState(null);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -81,12 +81,30 @@ function App() {
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) setDb(JSON.parse(saved));
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Ensure history exists for migration
+            if (!parsed.history) parsed.history = [];
+            setDb(parsed);
+        }
     }, []);
 
     useEffect(() => {
         if (db.series.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
     }, [db]);
+
+    const logAction = (type, description) => {
+        const newLog = {
+            id: Date.now(),
+            type, // 'ADD', 'DELETE', 'WATCH', 'UPDATE'
+            description,
+            timestamp: new Date().toISOString()
+        };
+        setDb(prev => ({
+            ...prev,
+            history: [newLog, ...prev.history].slice(0, 20) // Keep last 20
+        }));
+    };
 
     const handleSeriesSelect = async (show) => {
         setShowAddModal(false);
@@ -113,6 +131,8 @@ function App() {
                 series: [newSeries, ...prev.series],
                 userData: { ...prev.userData, [newSeries.id]: { completed: {}, notes: {} } }
             }));
+
+            logAction('ADD', `${newSeries.name} takip listesine eklendi.`);
             setLoadingState(null);
         } catch (e) {
             alert("Hata: " + e.message);
@@ -125,6 +145,13 @@ function App() {
             ...prev,
             userData: { ...prev.userData, [seriesId]: { ...prev.userData[seriesId], ...newData } }
         }));
+
+        // Try to log meaningful updates
+        const seriesName = db.series.find(s => s.id === seriesId)?.name || "Dizi";
+        if (newData.completed) {
+            // Simplification: just log that progress was updated
+            logAction('WATCH', `${seriesName} ilerlemesi güncellendi.`);
+        }
     };
 
     const handleDelete = (e, seriesId) => {
@@ -134,10 +161,12 @@ function App() {
 
     const confirmDelete = () => {
         if (seriesToDelete) {
+            const seriesName = db.series.find(s => s.id === seriesToDelete)?.name || "Bir dizi";
             setDb(prev => ({
                 ...prev,
                 series: prev.series.filter(s => s.id !== seriesToDelete)
             }));
+            logAction('DELETE', `${seriesName} silindi.`);
             setSeriesToDelete(null);
         }
     };
@@ -168,6 +197,7 @@ function App() {
                 onClose={() => setSidebarOpen(false)}
                 onNavigate={navigateTo}
                 activeView={activeView}
+                history={db.history}
             />
 
             {activeSeriesId ? (
