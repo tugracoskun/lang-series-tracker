@@ -1,31 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Database, X, Menu } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import SeriesDetail from './components/SeriesDetail';
 import Sidebar from './components/Sidebar';
 import VocabularyPage from './components/VocabularyPage';
 import FlashcardsPage from './components/FlashcardsPage';
+import LoadingScreen from './components/LoadingScreen';
 import { TVMazeService } from './services/TVMazeService';
 import { generateSeasonSchedule } from './utils/schedule';
 
 const STORAGE_KEY = 'langTracker_v4_seasons';
-
-// Cinematic Loader Component
-const CinematicLoader = ({ status }) => (
-    <div className="fixed inset-0 z-[60] bg-black flex flex-col items-center justify-center font-mono">
-        <div className="scan-line top-1/2"></div>
-        <div className="text-2xl font-bold text-white mb-4 animate-pulse uppercase tracking-[0.2em]">
-            Sistem İnşa Ediliyor
-        </div>
-        <div className="text-xs text-indigo-400 max-w-xs text-center leading-relaxed opacity-80">
-            {status || "Nöral ağlar bağlanıyor..."}<br />
-            Rotasyon matrisi hesaplanıyor...<br />
-            Sezon verileri işleniyor...
-        </div>
-        <div className="mt-8 w-48 h-1 bg-gray-900 rounded-full overflow-hidden">
-            <div className="h-full bg-indigo-500 animate-[scan_1s_ease-in-out_infinite]"></div>
-        </div>
-    </div>
-);
 
 // Add Series Modal
 const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
@@ -159,7 +143,9 @@ function App() {
 
     return (
         <div className="min-h-screen text-slate-200 font-sans">
-            {loadingState && <CinematicLoader status={loadingState} />}
+            <AnimatePresence>
+                {loadingState && <LoadingScreen key="loader" status={loadingState} />}
+            </AnimatePresence>
             <Sidebar
                 isOpen={isSidebarOpen}
                 onClose={() => setSidebarOpen(false)}
