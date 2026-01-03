@@ -286,8 +286,8 @@ function App() {
 
                     <header className="flex justify-between items-end mb-16">
                         <div>
-                            <h1 className="text-5xl md:text-6xl font-display font-bold text-white tracking-tighter">
-                                LANG<span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-600">TRACKER</span>
+                            <h1 className="text-6xl md:text-8xl font-codon font-bold text-white tracking-widest drop-shadow-[0_0_25px_rgba(186,230,253,0.3)] animate-float">
+                                LANG<span className="text-transparent bg-clip-text bg-[linear-gradient(to_right,#bae6fd,#e0f2fe,#a5f3fc,#bae6fd)] bg-[length:200%_auto] animate-shimmer-slow">TRACKER</span>
                             </h1>
                             <p className="text-slate-400 mt-2 text-lg">Sezon Bazlı Rotasyon Protokolü</p>
                         </div>
