@@ -7,6 +7,7 @@ import VocabularyPage from './components/VocabularyPage';
 import FlashcardsPage from './components/FlashcardsPage';
 import LoadingScreen from './components/LoadingScreen';
 import ConfirmationModal from './components/ConfirmationModal';
+import WatchlistPage from './components/WatchlistPage';
 import { TVMazeService } from './services/TVMazeService';
 import { generateSeasonSchedule } from './utils/schedule';
 
@@ -85,6 +86,7 @@ function App() {
             const parsed = JSON.parse(saved);
             // Ensure history exists for migration
             if (!parsed.history) parsed.history = [];
+            if (!parsed.watchlist) parsed.watchlist = [];
             setDb(parsed);
         }
     }, []);
@@ -171,10 +173,57 @@ function App() {
         }
     };
 
+    const handleAddToWatchlist = (show) => {
+        setShowAddModal(false);
+
+        // Check if already in watchlist or series
+        if (db.watchlist?.some(s => s.id === show.id) || db.series.some(s => s.id === show.id)) {
+            alert("Bu dizi zaten listenizde veya takibinizde.");
+            return;
+        }
+
+        const newWatchlistItem = {
+            id: show.id,
+            name: show.name,
+            image: show.image,
+            addedAt: new Date().toISOString()
+        };
+
+        setDb(prev => ({
+            ...prev,
+            watchlist: [newWatchlistItem, ...prev.watchlist || []]
+        }));
+        logAction('ADD_WATCHLIST', `${show.name} izleme listesine eklendi.`);
+    };
+
+    const removeFromWatchlist = (showId) => {
+        setDb(prev => ({
+            ...prev,
+            watchlist: (prev.watchlist || []).filter(s => s.id !== showId)
+        }));
+    };
+
+    const handleStartWatching = async (show) => {
+        // Remove from watchlist first (optimistic)
+        removeFromWatchlist(show.id);
+
+        // Trigger standard add flow
+        await handleSeriesSelect(show);
+    };
+
     const navigateTo = (view) => {
         setActiveView(view);
         setActiveSeriesId(null);
         setSidebarOpen(false);
+    };
+
+    // Modified helper for AddModal selection based on context
+    const onModalSelect = (show) => {
+        if (activeView === 'watchlist') {
+            handleAddToWatchlist(show);
+        } else {
+            handleSeriesSelect(show);
+        }
     };
 
     return (
@@ -215,6 +264,13 @@ function App() {
                 <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
                     <FlashcardsPage onBack={() => setActiveView('dashboard')} />
                 </div>
+            ) : activeView === 'watchlist' ? (
+                <WatchlistPage
+                    watchlist={db.watchlist || []}
+                    onStartWatching={handleStartWatching}
+                    onRemove={removeFromWatchlist}
+                    onAddClick={() => setShowAddModal(true)}
+                />
             ) : (
                 <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
                     <div className="absolute top-6 right-6 z-50">
@@ -278,9 +334,10 @@ function App() {
                         )}
                     </div>
                 </div>
-            )}
-            <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={handleSeriesSelect} />
-        </div>
+            )
+            }
+            <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />
+        </div >
     );
 }
 
