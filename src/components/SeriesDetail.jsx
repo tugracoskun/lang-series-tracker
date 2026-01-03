@@ -180,7 +180,7 @@ const SeriesDetail = ({ series, data, onBack, onUpdate }) => {
                                                                 return (
                                                                     <div key={dIdx}
                                                                         onClick={() => openEpisode(day, id)}
-                                                                        className={`group flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all border border-transparent ${isChecked ? 'bg-emerald-500/10 border-emerald-500/20' : 'hover:bg-white/10 hover:border-white/20 bg-black/20'}`}>
+                                                                        className={`group flex items-start gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-300 border border-transparent ${isChecked ? 'bg-emerald-500/10 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.25)]' : 'hover:bg-white/10 hover:border-white/20 bg-black/20'}`}>
 
                                                                         <div onClick={(e) => { e.stopPropagation(); toggleDay(id); }}
                                                                             className={`mt-1 w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-all cursor-pointer hover:border-emerald-400 ${isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600'}`}>

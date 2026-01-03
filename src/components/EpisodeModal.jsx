@@ -37,7 +37,7 @@ const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpd
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-md animate-fade-in" onClick={onClose}>
-            <div className="glass-panel w-full max-w-2xl max-h-[90vh] rounded-3xl relative flex flex-col overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className={`glass-panel w-full max-w-2xl max-h-[90vh] rounded-3xl relative flex flex-col overflow-hidden ${isWatched ? 'watched' : ''}`} onClick={e => e.stopPropagation()}>
 
                 {/* Header Image Area */}
                 <div className="relative h-48 md:h-64 flex-shrink-0">
@@ -75,7 +75,7 @@ const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpd
                         <div className="flex-shrink-0 flex flex-col gap-3 min-w-[140px]">
                             <button
                                 onClick={() => onToggle(context.id)}
-                                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all shadow-lg ${isWatched ? 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-600' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>
+                                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg ${isWatched ? 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-600' : 'bg-slate-700 text-slate-200 hover:bg-slate-600'}`}>
                                 {isWatched ? <CheckCircle2 size={20} /> : <Circle size={20} />}
                                 {isWatched ? "İZLENDİ" : "İZLEDİM OLARAK İŞARETLE"}
                             </button>
