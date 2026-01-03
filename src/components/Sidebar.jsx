@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { LayoutDashboard, BookOpen, Settings, User, X, Database, Zap, Sparkles, Clock, Activity, PlusCircle, Trash2, CheckCircle, Bookmark } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Settings, User, X, Database, Zap, Sparkles, Clock, Activity, PlusCircle, Trash2, CheckCircle, Bookmark, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Sidebar = ({ isOpen, onClose, onNavigate, activeView, history }) => {
@@ -189,6 +189,13 @@ const Sidebar = ({ isOpen, onClose, onNavigate, activeView, history }) => {
                                             label="Flashcards"
                                             active={activeView === 'flashcards'}
                                             onClick={() => onNavigate('flashcards')}
+                                            variants={itemVariants}
+                                        />
+                                        <MenuLink
+                                            icon={<FileText size={20} />}
+                                            label="Notlarım"
+                                            active={activeView === 'notes'}
+                                            onClick={() => onNavigate('notes')}
                                             variants={itemVariants}
                                         />
                                         <MenuLink

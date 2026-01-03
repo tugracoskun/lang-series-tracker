@@ -8,6 +8,7 @@ import FlashcardsPage from './components/FlashcardsPage';
 import LoadingScreen from './components/LoadingScreen';
 import ConfirmationModal from './components/ConfirmationModal';
 import WatchlistPage from './components/WatchlistPage';
+import NotesPage from './components/NotesPage';
 import { TVMazeService } from './services/TVMazeService';
 import { generateSeasonSchedule } from './utils/schedule';
 
@@ -72,7 +73,7 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
 };
 
 function App() {
-    const [db, setDb] = useState({ series: [], userData: {}, history: [] }); // Added history
+    const [db, setDb] = useState({ series: [], userData: {}, history: [], watchlist: [], notes: [] });
     const [activeSeriesId, setActiveSeriesId] = useState(null);
     const [activeView, setActiveView] = useState('dashboard');
     const [showAddModal, setShowAddModal] = useState(false);
@@ -84,28 +85,53 @@ function App() {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             const parsed = JSON.parse(saved);
-            // Ensure history exists for migration
+            // Ensure fields exist for migration
             if (!parsed.history) parsed.history = [];
             if (!parsed.watchlist) parsed.watchlist = [];
+            if (!parsed.notes) parsed.notes = [];
             setDb(parsed);
         }
     }, []);
 
     useEffect(() => {
-        if (db.series.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        if (db.series.length > 0 || db.notes.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
     }, [db]);
 
     const logAction = (type, description) => {
         const newLog = {
             id: Date.now(),
-            type, // 'ADD', 'DELETE', 'WATCH', 'UPDATE'
+            type,
             description,
             timestamp: new Date().toISOString()
         };
         setDb(prev => ({
             ...prev,
-            history: [newLog, ...prev.history].slice(0, 20) // Keep last 20
+            history: [newLog, ...prev.history].slice(0, 20)
         }));
+    };
+
+    // --- NOTES CRUD ---
+    const handleAddNote = (note) => {
+        setDb(prev => ({
+            ...prev,
+            notes: [...prev.notes, { ...note, id: Date.now(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }]
+        }));
+        logAction('ADD', `Yeni not eklendi: ${note.title}`);
+    };
+
+    const handleUpdateNote = (id, updates) => {
+        setDb(prev => ({
+            ...prev,
+            notes: prev.notes.map(n => n.id === id ? { ...n, ...updates, updatedAt: new Date().toISOString() } : n)
+        }));
+    };
+
+    const handleDeleteNote = (id) => {
+        setDb(prev => ({
+            ...prev,
+            notes: prev.notes.filter(n => n.id !== id)
+        }));
+        logAction('DELETE', 'Bir not silindi');
     };
 
     const handleSeriesSelect = async (show) => {
@@ -263,6 +289,16 @@ function App() {
             ) : activeView === 'flashcards' ? (
                 <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
                     <FlashcardsPage onBack={() => setActiveView('dashboard')} />
+                </div>
+            ) : activeView === 'notes' ? (
+                <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
+                    <NotesPage
+                        db={db}
+                        onAdd={handleAddNote}
+                        onUpdate={handleUpdateNote}
+                        onDelete={handleDeleteNote}
+                        onBack={() => setActiveView('dashboard')}
+                    />
                 </div>
             ) : activeView === 'watchlist' ? (
                 <WatchlistPage
