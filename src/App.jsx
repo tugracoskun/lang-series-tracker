@@ -10,6 +10,7 @@ import ConfirmationModal from './components/ConfirmationModal';
 import WatchlistPage from './components/WatchlistPage';
 import NotesPage from './components/NotesPage';
 import { TVMazeService } from './services/TVMazeService';
+import RecommendationsSection from './components/RecommendationsSection';
 import { generateSeasonSchedule } from './utils/schedule';
 
 const STORAGE_KEY = 'langTracker_v4_seasons';
@@ -159,6 +160,11 @@ function App() {
     // ... existing handleSeriesSelect with difficulty logging if desired ...
     const handleSeriesSelect = async (show) => {
         setShowAddModal(false);
+        if (db.series.some(s => s.id === show.id.toString())) {
+            alert('Bu dizi zaten takip listenizde mevcut!');
+            return;
+        }
+
         setLoadingState("Veri bağlantısı kuruluyor...");
         try {
             const details = await TVMazeService.getShowDetails(show.id);
@@ -237,10 +243,27 @@ function App() {
         await handleSeriesSelect(show);
     };
 
-    const navigateTo = (view) => {
+    // --- NAVIGATION with HISTORY ---
+    useEffect(() => {
+        const handlePopState = (event) => {
+            if (event.state?.view) {
+                setActiveView(event.state.view);
+                setActiveSeriesId(event.state.seriesId || null);
+            } else {
+                setActiveView('dashboard');
+                setActiveSeriesId(null);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    const navigateTo = (view, seriesId = null) => {
         setActiveView(view);
-        setActiveSeriesId(null);
+        setActiveSeriesId(seriesId);
         setSidebarOpen(false);
+        window.history.pushState({ view, seriesId }, '', `?view=${view}`);
     };
 
     const onModalSelect = (show) => {
@@ -386,6 +409,8 @@ function App() {
                             </div>
                         )}
                     </div>
+
+                    <RecommendationsSection onStart={handleStartWatching} onWatchlist={handleAddToWatchlist} />
                 </div>
             )}
             <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />

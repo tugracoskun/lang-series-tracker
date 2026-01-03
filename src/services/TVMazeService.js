@@ -9,6 +9,7 @@ export const TVMazeService = {
 
     async getShowDetails(id) {
         const res = await fetch(`${BASE_URL}/shows/${id}?embed=episodes`);
+        if (!res.ok) throw new Error(`TVMaze API Error: ${res.status}`);
         return await res.json();
     }
 };
