@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import VocabularyPage from './components/VocabularyPage';
 import FlashcardsPage from './components/FlashcardsPage';
 import LoadingScreen from './components/LoadingScreen';
+import ConfirmationModal from './components/ConfirmationModal';
 import { TVMazeService } from './services/TVMazeService';
 import { generateSeasonSchedule } from './utils/schedule';
 
@@ -76,6 +77,7 @@ function App() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [loadingState, setLoadingState] = useState(null);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [seriesToDelete, setSeriesToDelete] = useState(null);
 
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -127,11 +129,16 @@ function App() {
 
     const handleDelete = (e, seriesId) => {
         e.stopPropagation();
-        if (confirm("Bu diziyi silmek istediğine emin misin?")) {
+        setSeriesToDelete(seriesId);
+    };
+
+    const confirmDelete = () => {
+        if (seriesToDelete) {
             setDb(prev => ({
                 ...prev,
-                series: prev.series.filter(s => s.id !== seriesId)
+                series: prev.series.filter(s => s.id !== seriesToDelete)
             }));
+            setSeriesToDelete(null);
         }
     };
 
@@ -145,6 +152,16 @@ function App() {
         <div className="min-h-screen text-slate-200 font-sans">
             <AnimatePresence>
                 {loadingState && <LoadingScreen key="loader" status={loadingState} />}
+                {seriesToDelete && (
+                    <ConfirmationModal
+                        key="confirm-modal"
+                        isOpen={!!seriesToDelete}
+                        title="Diziyi Sil"
+                        message="Bu diziyi ve tüm ilerlemeni silmek istediğine emin misin? Bu işlem geri alınamaz."
+                        onConfirm={confirmDelete}
+                        onCancel={() => setSeriesToDelete(null)}
+                    />
+                )}
             </AnimatePresence>
             <Sidebar
                 isOpen={isSidebarOpen}
