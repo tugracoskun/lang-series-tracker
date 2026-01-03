@@ -410,7 +410,7 @@ function App() {
                         )}
                     </div>
 
-                    <RecommendationsSection onStart={handleStartWatching} onWatchlist={handleAddToWatchlist} />
+                    <RecommendationsSection onStart={handleStartWatching} onWatchlist={handleAddToWatchlist} watchlist={db.watchlist} />
                 </div>
             )}
             <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />

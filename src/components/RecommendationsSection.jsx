@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, PlusCircle, Info, Loader, Play, Clock, ImageOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PlusCircle, Info, Loader, Play, Clock, ImageOff, Check, CheckCircle } from 'lucide-react';
 import { TVMazeService } from '../services/TVMazeService';
 import { RECOMMENDATIONS } from '../data/recommendations';
 
-const SeriesCard = ({ id, onStart, onWatchlist }) => {
+const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
     const [show, setShow] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imgError, setImgError] = useState(false);
@@ -25,10 +25,13 @@ const SeriesCard = ({ id, onStart, onWatchlist }) => {
     }, [id]);
 
     if (loading) return <div className="min-w-[160px] h-[240px] bg-slate-800/50 rounded-xl animate-pulse mx-2 flex items-center justify-center"><Loader size={20} className="animate-spin text-slate-600" /></div>;
-    // Strict validation: Don't render if failed, or if name is "Not Found" (TVMaze quirk)
+
+    // Strict validation: Don't render if failed, or if name is "Not Found"
     if (!show || show.name === 'Not Found' || show.status === 404) return null;
 
     const hasImage = show.image?.medium && !imgError;
+    // Check if series is in watchlist
+    const isInWatchlist = watchlist?.some(item => item.id === show.id);
 
     return (
         <div
@@ -51,10 +54,14 @@ const SeriesCard = ({ id, onStart, onWatchlist }) => {
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                 <button
                     onClick={(e) => { e.stopPropagation(); onWatchlist(show); }}
-                    className="p-1 hover:bg-black/50 rounded-full transition-colors"
-                    title="İzleme Listesine Ekle"
+                    className={`p-1 rounded-full transition-colors ${isInWatchlist ? 'bg-emerald-500/80 hover:bg-emerald-600' : 'hover:bg-black/50'}`}
+                    title={isInWatchlist ? "Listede Var" : "İzleme Listesine Ekle"}
                 >
-                    <PlusCircle className="text-white drop-shadow-md hover:text-indigo-400 transition-colors" size={24} />
+                    {isInWatchlist ? (
+                        <Check className="text-white drop-shadow-md" size={24} />
+                    ) : (
+                        <PlusCircle className="text-white drop-shadow-md hover:text-indigo-400 transition-colors" size={24} />
+                    )}
                 </button>
             </div>
 
@@ -67,9 +74,13 @@ const SeriesCard = ({ id, onStart, onWatchlist }) => {
                 </button>
                 <button
                     onClick={() => onWatchlist(show)}
-                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 ${isInWatchlist
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
+                            : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                        }`}
                 >
-                    <Clock size={14} /> LİSTE
+                    {isInWatchlist ? <CheckCircle size={14} /> : <Clock size={14} />}
+                    {isInWatchlist ? 'LİSTEDE' : 'LİSTE'}
                 </button>
             </div>
 
@@ -90,7 +101,7 @@ const SeriesCard = ({ id, onStart, onWatchlist }) => {
     );
 };
 
-const RecommendationRow = ({ title, description, items, onStart, onWatchlist }) => {
+const RecommendationRow = ({ title, description, items, onStart, onWatchlist, watchlist }) => {
     const scrollRef = React.useRef(null);
 
     const scroll = (offset) => {
@@ -120,7 +131,13 @@ const RecommendationRow = ({ title, description, items, onStart, onWatchlist }) 
                     style={{ scrollBehavior: 'smooth' }}
                 >
                     {items.map(item => (
-                        <SeriesCard key={item.id} id={item.id} onStart={onStart} onWatchlist={onWatchlist} />
+                        <SeriesCard
+                            key={item.id}
+                            id={item.id}
+                            onStart={onStart}
+                            onWatchlist={onWatchlist}
+                            watchlist={watchlist}
+                        />
                     ))}
                 </div>
 
@@ -135,7 +152,7 @@ const RecommendationRow = ({ title, description, items, onStart, onWatchlist }) 
     );
 };
 
-const RecommendationsSection = ({ onStart, onWatchlist }) => {
+const RecommendationsSection = ({ onStart, onWatchlist, watchlist }) => {
     return (
         <div className="mt-16 border-t border-slate-800/50 pt-12">
             <div className="flex items-center gap-3 mb-8">
@@ -156,6 +173,7 @@ const RecommendationsSection = ({ onStart, onWatchlist }) => {
                     items={cat.items}
                     onStart={onStart}
                     onWatchlist={onWatchlist}
+                    watchlist={watchlist}
                 />
             ))}
         </div>
