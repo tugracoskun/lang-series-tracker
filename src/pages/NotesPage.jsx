@@ -1,8 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Plus, FileText, Tag, Clock, Book, X, ChevronRight, Edit2, Trash2, Save, Filter } from 'lucide-react';
+import { Search, Plus, FileText, Clock, Book, ChevronRight, Trash2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import PropTypes from 'prop-types';
+import { useAppStore } from '../store/useAppStore';
 
-const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
+const NotesPage = ({ onAdd, onUpdate, onDelete }) => {
+    const { series, notes: allNotes } = useAppStore();
+    const notes = allNotes || [];
     const [selectedNotebook, setSelectedNotebook] = useState(null); // 'general' or seriesId
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState('ALL');
@@ -11,21 +15,21 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
 
     // Filter notes based on selection
     const filteredNotes = useMemo(() => {
-        let notes = db.notes || [];
+        let nList = notes;
 
         // Notebook filter
         if (selectedNotebook) {
             if (selectedNotebook === 'general') {
-                notes = notes.filter(n => !n.seriesId);
+                nList = nList.filter(n => !n.seriesId);
             } else {
-                notes = notes.filter(n => n.seriesId === selectedNotebook);
+                nList = nList.filter(n => n.seriesId === selectedNotebook);
             }
         }
 
         // Search filter
         if (searchQuery) {
             const lowerQ = searchQuery.toLowerCase();
-            notes = notes.filter(n =>
+            nList = nList.filter(n =>
                 n.title.toLowerCase().includes(lowerQ) ||
                 n.content.toLowerCase().includes(lowerQ)
             );
@@ -33,17 +37,18 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
 
         // Tag filter
         if (selectedTag !== 'ALL') {
-            notes = notes.filter(n => n.tag === selectedTag);
+            nList = nList.filter(n => n.tag === selectedTag);
         }
 
-        return notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-    }, [db.notes, selectedNotebook, searchQuery, selectedTag]);
+        return nList.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    }, [notes, selectedNotebook, searchQuery, selectedTag]);
 
-    const activeNotebookName = selectedNotebook === 'general'
-        ? 'Genel Notlar'
-        : selectedNotebook
-            ? db.series.find(s => s.id === selectedNotebook)?.name
-            : 'Tüm Notlar';
+    let activeNotebookName = 'Tüm Notlar';
+    if (selectedNotebook === 'general') {
+        activeNotebookName = 'Genel Notlar';
+    } else if (selectedNotebook) {
+        activeNotebookName = series.find(s => s.id === selectedNotebook)?.name || 'Bilinmeyen Dizi';
+    }
 
     const handleCreateNew = () => {
         setEditingNote({
@@ -77,7 +82,7 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                             active={selectedNotebook === null}
                             onClick={() => setSelectedNotebook(null)}
                             label="Tüm Notlar"
-                            count={db.notes.length}
+                            count={notes.length}
                             icon={<FileText size={16} />}
                         />
                         {/* General Notes */}
@@ -85,17 +90,17 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                             active={selectedNotebook === 'general'}
                             onClick={() => setSelectedNotebook('general')}
                             label="Genel Notlar"
-                            count={db.notes.filter(n => !n.seriesId).length}
+                            count={notes.filter(n => !n.seriesId).length}
                             icon={<Book size={16} />}
                         />
                         {/* Series Notebooks */}
-                        {db.series.map(s => (
+                        {series.map(s => (
                             <NotebookItem
                                 key={s.id}
                                 active={selectedNotebook === s.id}
                                 onClick={() => setSelectedNotebook(s.id)}
                                 label={s.name}
-                                count={db.notes.filter(n => n.seriesId === s.id).length}
+                                count={notes.filter(n => n.seriesId === s.id).length}
                                 image={s.image?.medium}
                             />
                         ))}
@@ -110,7 +115,7 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                         <NoteEditor
                             key="editor"
                             initialNote={editingNote}
-                            seriesList={db.series}
+                            seriesList={series}
                             onSave={handleSave}
                             onCancel={() => { setEditingNote(null); setIsCreating(false); }}
                         />
@@ -136,12 +141,12 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                                             placeholder="Ara..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none w-64"
+                                            className="glass-input rounded-xl pl-10 pr-4 py-2 text-sm text-white focus:outline-none w-64"
                                         />
                                     </div>
                                     <button
                                         onClick={handleCreateNew}
-                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors shadow-lg shadow-indigo-500/20"
+                                        className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold transition-all shadow-xl shadow-indigo-500/20"
                                     >
                                         <Plus size={18} />
                                         Yeni Not
@@ -168,10 +173,10 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                             {/* Notes Grid */}
                             <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start pr-2 custom-scrollbar">
                                 {filteredNotes.map(note => (
-                                    <div
+                                    <button
                                         key={note.id}
                                         onClick={() => setEditingNote(note)}
-                                        className="bg-slate-900/40 border border-white/5 rounded-2xl p-4 cursor-pointer hover:border-indigo-500/30 hover:bg-slate-900/60 transition-all group group-hover:shadow-lg"
+                                        className="glass-panel border-white/5 rounded-[1.5rem] p-5 cursor-pointer hover:border-indigo-500/30 transition-all group text-left"
                                     >
                                         <div className="flex justify-between items-start mb-3">
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${getTagColor(note.tag)}`}>
@@ -192,7 +197,7 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
                                             <Clock size={12} />
                                             {new Date(note.updatedAt).toLocaleDateString()}
                                         </div>
-                                    </div>
+                                    </button>
                                 ))}
                                 {filteredNotes.length === 0 && (
                                     <div className="col-span-full py-20 text-center text-slate-500 italic">
@@ -212,15 +217,15 @@ const NotesPage = ({ db, onAdd, onUpdate, onDelete, onBack }) => {
 const NotebookItem = ({ active, onClick, label, count, icon, image }) => (
     <button
         onClick={onClick}
-        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${active ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${active ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-xl shadow-indigo-900/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'
             }`}
     >
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${active ? 'bg-white/10' : 'bg-slate-800'}`}>
-            {image ? <img src={image} className="w-full h-full object-cover" /> : icon}
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 overflow-hidden ${active ? 'bg-white/10' : 'bg-white/5 border border-white/5'}`}>
+            {image ? <img src={image} className="w-full h-full object-cover" alt={label} /> : icon}
         </div>
         <span className="flex-1 text-left text-sm font-medium truncate">{label}</span>
         {count > 0 && (
-            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${active ? 'bg-black/20 text-indigo-100' : 'bg-white/5 text-slate-500'}`}>
+            <span className={`liquid-badge ${active ? 'bg-white/10 text-white border-white/20' : 'liquid-badge-indigo'}`}>
                 {count}
             </span>
         )}
@@ -306,6 +311,28 @@ const getTagColor = (tag) => {
         case 'Question': return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
         default: return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
     }
+};
+
+NotesPage.propTypes = {
+    onAdd: PropTypes.func.isRequired,
+    onUpdate: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired
+};
+
+NotebookItem.propTypes = {
+    active: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired,
+    label: PropTypes.string.isRequired,
+    count: PropTypes.number.isRequired,
+    icon: PropTypes.node,
+    image: PropTypes.string
+};
+
+NoteEditor.propTypes = {
+    initialNote: PropTypes.object.isRequired,
+    seriesList: PropTypes.array.isRequired,
+    onSave: PropTypes.func.isRequired,
+    onCancel: PropTypes.func.isRequired
 };
 
 export default NotesPage;

@@ -1,8 +1,9 @@
-import React from 'react';
 import { Play, Trash2, Bookmark, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
+import { useAppStore } from '../store/useAppStore';
 
-const WatchlistPage = ({ watchlist, onStartWatching, onRemove, onAddClick }) => {
+const WatchlistPage = ({ onStartWatching, onRemove, onAddClick }) => {
+    const { watchlist } = useAppStore();
     return (
         <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
             <header className="flex justify-between items-end mb-12">
@@ -23,15 +24,17 @@ const WatchlistPage = ({ watchlist, onStartWatching, onRemove, onAddClick }) => 
             </header>
 
             {watchlist.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-white/10 rounded-3xl bg-white/5 backdrop-blur-sm">
-                    <Bookmark size={64} className="text-white/20 mb-6" />
-                    <h3 className="text-2xl font-display font-bold text-white mb-2">Listeniz Boş</h3>
+                <div className="flex flex-col items-center justify-center py-24 text-center border border-white/5 rounded-[2.5rem] glass-panel">
+                    <div className="w-24 h-24 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-6 shadow-2xl">
+                        <Bookmark size={40} className="text-slate-600" />
+                    </div>
+                    <h3 className="text-2xl font-display font-bold text-white mb-2">Listeniz Bos</h3>
                     <p className="text-slate-400 max-w-md mx-auto mb-8">Henüz izleme listenize bir dizi eklemediniz.</p>
                     <button
                         onClick={onAddClick}
-                        className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+                        className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white font-bold rounded-2xl transition-all shadow-2xl shadow-indigo-500/20"
                     >
-                        İlk Dizini Ekle
+                        Ilk Dizini Ekle
                     </button>
                 </div>
             ) : (
@@ -71,7 +74,7 @@ const WatchlistPage = ({ watchlist, onStartWatching, onRemove, onAddClick }) => 
                             </div>
 
                             {/* Hover Badge */}
-                            <div className="absolute top-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-xs font-bold text-indigo-400 border border-indigo-500/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute top-4 right-4 liquid-badge liquid-badge-indigo opacity-0 group-hover:opacity-100 transition-opacity">
                                 PLANLANDI
                             </div>
                         </div>
@@ -80,6 +83,12 @@ const WatchlistPage = ({ watchlist, onStartWatching, onRemove, onAddClick }) => 
             )}
         </div>
     );
+};
+
+WatchlistPage.propTypes = {
+    onStartWatching: PropTypes.func.isRequired,
+    onRemove: PropTypes.func.isRequired,
+    onAddClick: PropTypes.func.isRequired
 };
 
 export default WatchlistPage;

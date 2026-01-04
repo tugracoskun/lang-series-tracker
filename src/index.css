@@ -9,9 +9,68 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --liquid-primary: #6366f1;
+    --liquid-secondary: #a855f7;
+    --liquid-accent: #ec4899;
+}
+
 body {
-    background-color: #000;
+    background-color: #05070a;
+    color: #e2e8f0;
     scrollbar-gutter: stable;
+    overflow-x: hidden;
+}
+
+/* Liquid Mesh Background */
+.liquid-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -2;
+    background: radial-gradient(circle at 0% 0%, #0c121e 0%, #05070a 100%);
+    overflow: hidden;
+}
+
+.liquid-bg::before,
+.liquid-bg::after {
+    content: '';
+    position: absolute;
+    width: 60vmax;
+    height: 60vmax;
+    border-radius: 50%;
+    opacity: 0.15;
+    filter: blur(80px);
+    z-index: -1;
+    animation: liquid-drift 20s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.liquid-bg::before {
+    background: var(--liquid-primary);
+    top: -20%;
+    left: -10%;
+}
+
+.liquid-bg::after {
+    background: var(--liquid-secondary);
+    bottom: -20%;
+    right: -10%;
+    animation-delay: -5s;
+    animation-duration: 25s;
+}
+
+@keyframes liquid-drift {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(10%, 15%) scale(1.1) rotate(15deg);
+    }
 }
 
 .cinematic-bg {
@@ -23,7 +82,7 @@ body {
     z-index: -1;
     background-size: cover;
     background-position: center;
-    transition: opacity 1s ease;
+    transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cinematic-bg::after {
@@ -31,47 +90,144 @@ body {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom,
-            rgba(0, 0, 0, 0.3) 0%,
-            rgba(0, 0, 0, 0.8) 50%,
-            #000 100%);
-    backdrop-filter: blur(8px);
+            rgba(5, 7, 10, 0.2) 0%,
+            rgba(5, 7, 10, 0.7) 50%,
+            #05070a 100%);
+    backdrop-filter: blur(4px);
 }
 
+/* Liquid Glass Panels */
 .glass-panel {
-    background: rgba(20, 20, 20, 0.6);
-    backdrop-filter: blur(20px);
+    background: rgba(15, 18, 25, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    transition: all 0.5s ease;
+    box-shadow:
+        0 4px 24px -1px rgba(0, 0, 0, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.02);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-panel.watched {
-    border-color: rgba(16, 185, 129, 0.5);
-    box-shadow: 0 0 50px rgba(16, 185, 129, 0.25), 0 8px 32px rgba(0, 0, 0, 0.4);
+.glass-panel:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 12px 40px -1px rgba(0, 0, 0, 0.3),
+        inset 0 0 40px rgba(255, 255, 255, 0.04);
+}
+
+.liquid-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 32px rgba(255, 255, 255, 0.02);
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Liquid Badges */
+.liquid-badge {
+    @apply px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border backdrop-blur-md shadow-lg transition-all duration-300;
+}
+
+.liquid-badge-indigo {
+    @apply bg-indigo-500/20 border-indigo-500/30 text-indigo-400 shadow-indigo-500/10;
+}
+
+.liquid-badge-emerald {
+    @apply bg-emerald-500/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10;
+}
+
+.liquid-badge-rose {
+    @apply bg-rose-500/20 border-rose-500/30 text-rose-400 shadow-rose-500/10;
+}
+
+.liquid-badge-amber {
+    @apply bg-amber-500/20 border-amber-500/30 text-amber-400 shadow-amber-500/10;
+}
+
+/* Notification Badge */
+.notification-dot {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    background-color: rgb(99 102 241);
+    border-radius: 9999px;
+    border: 2px solid #05070a;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Toaster Overrides */
+[data-sonner-toaster] [data-sonner-toast] {
+    background: rgba(15, 18, 25, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 1.25rem !important;
+    color: white !important;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+    background-clip: content-box;
 }
 
-.glow-emerald {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+/* Typography Enhancements */
+.font-display {
+    letter-spacing: -0.02em;
 }
 
-.glow-emerald:hover {
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6);
+/* Utility Animations */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

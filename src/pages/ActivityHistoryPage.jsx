@@ -1,7 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Clock, Calendar, CheckCircle, PlusCircle, Trash2, Activity, Tv } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
 
-const ActivityHistoryPage = ({ history, onBack }) => {
+const ActivityHistoryPage = () => {
+    const navigate = useNavigate();
+    const { history } = useAppStore();
 
     // Group history by date (YYYY-MM-DD)
     const groupedHistory = history.reduce((groups, item) => {
@@ -44,7 +48,7 @@ const ActivityHistoryPage = ({ history, onBack }) => {
             {/* Header */}
             <div className="flex items-center gap-4 mb-12">
                 <button
-                    onClick={onBack}
+                    onClick={() => navigate('/')}
                     className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-slate-300 hover:text-white"
                 >
                     <ArrowLeft size={24} />
@@ -61,12 +65,12 @@ const ActivityHistoryPage = ({ history, onBack }) => {
                     <div key={date} className="relative animate-fade-in-up" style={{ animationDelay: `${groupIndex * 100}ms` }}>
 
                         {/* Date Pill (Positioned on the left vertical line) */}
-                        <div className="absolute -left-[2.75rem] md:-left-[3.75rem] top-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border border-white/10 bg-[#0F1218] shadow text-slate-500 z-10 transition-colors hover:border-indigo-500/50 hover:text-indigo-400">
+                        <div className="absolute -left-[2.75rem] md:-left-[3.75rem] top-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-full border border-white/10 bg-[#05070a] shadow-xl text-slate-500 z-10 transition-colors hover:border-indigo-500/50 hover:text-indigo-400">
                             <Calendar size={18} />
                         </div>
 
                         {/* Content Card (Strictly on the right of the line) */}
-                        <div className="w-full bg-[#13161C] p-6 rounded-2xl border border-white/5 shadow-xl hover:border-indigo-500/30 transition-all duration-300 group">
+                        <div className="w-full glass-panel p-8 rounded-[2rem] border-white/5 shadow-2xl transition-all duration-300 group">
                             <div className="flex items-center gap-3 mb-4 border-b border-white/5 pb-3">
                                 <span className="text-indigo-400 font-bold font-display text-sm uppercase tracking-wider">{date}</span>
                                 <span className="bg-white/5 text-slate-500 text-[10px] px-2 py-0.5 rounded-full">{items.length} İşlem</span>
@@ -103,10 +107,10 @@ const ActivityHistoryPage = ({ history, onBack }) => {
 
                 {history.length === 0 && (
                     <div className="text-center py-20">
-                        <div className="absolute -left-[1.25rem] top-0 p-1 bg-[#0F1218]">
+                        <div className="absolute -left-[1.25rem] top-0 p-1 bg-[#05070a]">
                             <div className="w-2 h-2 rounded-full bg-slate-700"></div>
                         </div>
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800/50 text-slate-600 mb-6">
+                        <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-white/5 border border-white/5 text-slate-600 mb-6 shadow-2xl backdrop-blur-md">
                             <Activity size={32} />
                         </div>
                         <h3 className="text-xl font-bold text-white mb-2">Henüz Aktivite Yok</h3>
