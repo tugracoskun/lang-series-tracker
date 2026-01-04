@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, PlusCircle, Info, Loader, Play, Clock, ImageOff, Check, CheckCircle } from 'lucide-react';
-import { TVMazeService } from '../services/TVMazeService';
-import { RECOMMENDATIONS } from '../data/recommendations';
+import {
+    ChevronLeft, ChevronRight, PlusCircle, Info, Loader, Play, Clock,
+    ImageOff, Check, CheckCircle, GraduationCap,
+    Sprout, Leaf, TreeDeciduous, TreePine, Mountain, MountainSnow
+} from 'lucide-react';
+import { TVMazeService } from '../../services/TVMazeService';
+import { RECOMMENDATIONS, CEFR_LEVELS } from '../../data/recommendations';
 
 const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
     const [show, setShow] = useState(null);
@@ -24,7 +28,7 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
         return () => { mounted = false; };
     }, [id]);
 
-    if (loading) return <div className="min-w-[160px] h-[240px] bg-slate-800/50 rounded-xl animate-pulse mx-2 flex items-center justify-center"><Loader size={20} className="animate-spin text-slate-600" /></div>;
+    if (loading) return <div className="min-w-[170px] h-[255px] bg-white/[0.02] border border-white/5 rounded-2xl animate-pulse mx-2 flex items-center justify-center"><Loader size={20} className="animate-spin text-slate-700" /></div>;
 
     // Strict validation: Don't render if failed, or if name is "Not Found"
     if (!show || show.name === 'Not Found' || show.status === 404) return null;
@@ -35,7 +39,7 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
 
     return (
         <div
-            className="group relative min-w-[160px] w-[160px] h-[240px] rounded-xl overflow-hidden cursor-pointer mx-2 transition-all hover:scale-105 hover:z-10 hover:shadow-xl hover:shadow-indigo-500/20 bg-slate-800"
+            className="group relative min-w-[170px] w-[170px] h-[255px] rounded-2xl overflow-hidden cursor-pointer mx-2 transition-all hover:shadow-2xl hover:shadow-indigo-500/20 glass-panel border-white/5"
         >
             {hasImage ? (
                 <img
@@ -45,7 +49,7 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
                     onError={() => setImgError(true)}
                 />
             ) : (
-                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 flex flex-col items-center justify-center p-4 text-center">
+                <div className="w-full h-full bg-gradient-to-br from-white/5 to-transparent flex flex-col items-center justify-center p-4 text-center">
                     <ImageOff size={32} className="text-slate-600 mb-2" />
                     <span className="text-xs text-slate-500 font-medium line-clamp-2">{show.name}</span>
                 </div>
@@ -75,8 +79,8 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
                 <button
                     onClick={() => onWatchlist(show)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 ${isInWatchlist
-                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
-                            : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
+                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                         }`}
                 >
                     {isInWatchlist ? <CheckCircle size={14} /> : <Clock size={14} />}
@@ -101,8 +105,31 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
     );
 };
 
-const RecommendationRow = ({ title, description, items, onStart, onWatchlist, watchlist }) => {
+const RecommendationRow = ({ title, description, items, level, onStart, onWatchlist, watchlist }) => {
     const scrollRef = React.useRef(null);
+    const levelInfo = CEFR_LEVELS[level];
+
+    // İkon haritası
+    const IconMap = {
+        Sprout: Sprout,
+        Leaf: Leaf,
+        TreeDeciduous: TreeDeciduous,
+        TreePine: TreePine,
+        Mountain: Mountain,
+        MountainSnow: MountainSnow
+    };
+
+    const LevelIcon = levelInfo ? IconMap[levelInfo.icon] : null;
+
+    // Renk haritası
+    const colorMap = {
+        emerald: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+        green: 'bg-green-500/20 text-green-400 border-green-500/30',
+        blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+        indigo: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+        purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+        rose: 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+    };
 
     const scroll = (offset) => {
         if (scrollRef.current) {
@@ -112,9 +139,18 @@ const RecommendationRow = ({ title, description, items, onStart, onWatchlist, wa
 
     return (
         <div className="mb-12 animate-fade-in-up">
-            <div className="flex items-baseline gap-4 mb-4 px-2">
-                <h3 className="text-2xl font-display font-bold text-slate-200">{title}</h3>
-                <span className="text-sm text-slate-500 hidden md:inline-block">{description}</span>
+            <div className="flex items-center gap-4 mb-4 px-2">
+                {/* CEFR Seviye Badge */}
+                {levelInfo && (
+                    <span className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-black border backdrop-blur-xl shadow-2xl transition-all duration-500 scale-100 hover:scale-105 ${levelInfo.color === 'emerald' ? 'liquid-badge-emerald' : levelInfo.color === 'amber' ? 'liquid-badge-amber' : levelInfo.color === 'rose' ? 'liquid-badge-rose' : 'liquid-badge-indigo'}`}>
+                        {LevelIcon && <LevelIcon size={18} />}
+                        {level}
+                    </span>
+                )}
+                <div>
+                    <h3 className="text-xl font-display font-bold text-slate-200">{title}</h3>
+                    <span className="text-sm text-slate-500 hidden md:inline-block">{description}</span>
+                </div>
             </div>
 
             <div className="relative group/row">
@@ -157,11 +193,11 @@ const RecommendationsSection = ({ onStart, onWatchlist, watchlist }) => {
         <div className="mt-16 border-t border-slate-800/50 pt-12">
             <div className="flex items-center gap-3 mb-8">
                 <div className="bg-indigo-500/10 p-2 rounded-lg">
-                    <Info className="text-indigo-400" size={24} />
+                    <GraduationCap className="text-indigo-400" size={24} />
                 </div>
                 <div>
-                    <h2 className="text-3xl font-bold text-white">Sizin İçin Seçtiklerimiz</h2>
-                    <p className="text-slate-400">Dil seviyenize ve hedeflerinize uygun özel listeler.</p>
+                    <h2 className="text-3xl font-bold text-white">CEFR Seviyelerine Göre Diziler</h2>
+                    <p className="text-slate-400">A1'den C2'ye kadar dil seviyenize uygun içerikler. Toplam 60+ dizi.</p>
                 </div>
             </div>
 
@@ -171,6 +207,7 @@ const RecommendationsSection = ({ onStart, onWatchlist, watchlist }) => {
                     title={cat.title}
                     description={cat.description}
                     items={cat.items}
+                    level={cat.level}
                     onStart={onStart}
                     onWatchlist={onWatchlist}
                     watchlist={watchlist}

@@ -1,427 +1,371 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Database, X, Menu } from 'lucide-react';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
+import { useUserData } from './hooks/useUserData';
+import { useAppMutations } from './hooks/useAppMutations';
+import { useAppStore } from './store/useAppStore';
+import { toast } from 'sonner';
 import { AnimatePresence } from 'framer-motion';
-import SeriesDetail from './components/SeriesDetail';
-import Sidebar from './components/Sidebar';
-import VocabularyPage from './components/VocabularyPage';
-import FlashcardsPage from './components/FlashcardsPage';
-import LoadingScreen from './components/LoadingScreen';
-import ConfirmationModal from './components/ConfirmationModal';
-import WatchlistPage from './components/WatchlistPage';
-import NotesPage from './components/NotesPage';
-import ActivityHistoryPage from './components/ActivityHistoryPage';
-import { TVMazeService } from './services/TVMazeService';
-import RecommendationsSection from './components/RecommendationsSection';
-import { generateSeasonSchedule } from './utils/schedule';
+import SeriesDetail from './pages/SeriesDetail';
+
+import VocabularyPage from './pages/VocabularyPage';
+import FlashcardsPage from './pages/FlashcardsPage';
+import LoadingScreen from './components/ui/LoadingScreen';
+import ConfirmationModal from './components/modals/ConfirmationModal';
+import WatchlistPage from './pages/WatchlistPage';
+import NotesPage from './pages/NotesPage';
+import ActivityHistoryPage from './pages/ActivityHistoryPage';
+import OnboardingModal from './components/auth/OnboardingModal';
+import AuthModal from './components/auth/AuthModal';
+import EmailConfirmation from './components/auth/EmailConfirmation';
+import SettingsPage from './pages/Settings';
+import LoginRequired from './components/auth/LoginRequired';
+import AddSeriesModal from './components/modals/AddSeriesModal';
+import Dashboard from './pages/Dashboard';
+import MainLayout from './layouts/MainLayout';
+import TraktCallback from './components/auth/TraktCallback';
+import {
+    AuthService,
+    isSupabaseConfigured,
+    ActivityService,
+    ProfileService
+} from './services/SupabaseService';
+
+import { useSeriesManager } from './hooks/useSeriesManager';
+import { useNoteManager } from './hooks/useNoteManager';
+import { useWatchlistManager } from './hooks/useWatchlistManager';
 
 const STORAGE_KEY = 'langTracker_v4_seasons';
 
-// Difficulty Estimation Helper
-const estimateDifficulty = (show) => {
-    const genres = show.genres || [];
-    if (genres.includes('Children') || genres.includes('Anime') || genres.includes('Animation')) return { level: 'Elementary', color: 'bg-emerald-500', text: 'A1-A2' };
-    if (genres.includes('Family') || genres.includes('Comedy') || genres.includes('Music') || genres.includes('Reality')) return { level: 'Intermediate', color: 'bg-indigo-500', text: 'B1-B2' };
-    if (genres.includes('Drama') || genres.includes('Romance') || genres.includes('Adventure')) return { level: 'Upper Int.', color: 'bg-purple-500', text: 'B2-C1' };
-    if (genres.includes('Science-Fiction') || genres.includes('Legal') || genres.includes('Medical') || genres.includes('Thriller') || genres.includes('Crime') || genres.includes('Mystery')) return { level: 'Advanced', color: 'bg-rose-500', text: 'C1-C2' };
-    return { level: 'Standard', color: 'bg-slate-500', text: 'Genel' };
-};
 
-// Add Series Modal
-const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState([]);
-    const [searching, setSearching] = useState(false);
-
-    useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (query.length > 2) {
-                setSearching(true);
-                try {
-                    const shows = await TVMazeService.searchShows(query);
-                    setResults(shows);
-                } catch (e) { console.error(e); }
-                setSearching(false);
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [query]);
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl animate-fade-in">
-            <div className="glass-panel w-full max-w-4xl h-[80vh] rounded-3xl p-8 relative flex flex-col overflow-hidden">
-                <button onClick={onClose} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
-                    <X size={32} />
-                </button>
-                <h2 className="text-3xl font-display font-bold text-white mb-2">Yeni Kayıt Başlat</h2>
-                <input
-                    type="text"
-                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-lg focus:ring-2 focus:ring-indigo-500 outline-none mb-8 placeholder:text-slate-600"
-                    placeholder="Dizi adı girin (örn. Breaking Bad)..."
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    autoFocus
-                />
-                <div className="flex-1 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 content-start pr-2 custom-scrollbar">
-                    {searching && <div className="col-span-full text-center text-slate-500">Taranıyor...</div>}
-                    {results.map(show => {
-                        const difficulty = estimateDifficulty(show);
-                        return (
-                            <div key={show.id} onClick={() => onSelect(show)}
-                                className="group relative aspect-[2/3] bg-slate-800 rounded-xl overflow-hidden cursor-pointer border border-transparent hover:border-indigo-500 transition-all hover:scale-[1.02]">
-                                {show.image?.medium ? (
-                                    <img src={show.image.medium} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                                ) : (
-                                    <div className="flex h-full items-center justify-center text-slate-600">Poster Yok</div>
-                                )}
-                                <div className="absolute top-2 right-2 z-10">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded shadow-lg text-white ${difficulty.color}`}>
-                                        {difficulty.text}
-                                    </span>
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent flex items-end p-4">
-                                    <div>
-                                        <h3 className="font-bold text-white text-sm leading-tight mb-1">{show.name}</h3>
-                                        <span className="text-[10px] text-slate-400">{difficulty.level}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 function App() {
-    const [db, setDb] = useState({ series: [], userData: {}, history: [], watchlist: [], notes: [] });
-    // ... existing state ...
-    const [activeSeriesId, setActiveSeriesId] = useState(null);
-    const [activeView, setActiveView] = useState('dashboard');
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [loadingState, setLoadingState] = useState(null);
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const [seriesToDelete, setSeriesToDelete] = useState(null);
+    // Router hooks
+    const navigate = useNavigate();
+    const location = useLocation();
 
+    // Store - Destructure everything we need
+    const {
+        // Auth State & Actions
+        user, setUser,
+        setUserName,
+        isAuthLoading, setAuthLoading,
+        showAuthModal, setShowAuthModal,
+
+        // Data State & Actions
+        series, userData, history, watchlist, notes,
+        setDb, addToHistory,
+
+        // UI Actions
+        loadingState, setLoadingState,
+
+        // Settings State
+        rotationStrategy, setRotationStrategy,
+        setCefrLevel
+    } = useAppStore();
+
+    const [showAddModal, setShowAddModal] = useState(false);
+    // Initial Load Check (Onboarding)
+    const [showOnboarding, setShowOnboarding] = useState(() => {
+        return !localStorage.getItem('langTracker_onboardingCompleted');
+    });
+
+    // Auth State
+    const [showEmailConfirmation, setShowEmailConfirmation] = useState(() => {
+        // URL'de hash varsa email confirmation callback olabilir
+        return globalThis.location.hash.includes('access_token') || globalThis.location.hash.includes('type=');
+    });
+    // Removed manual sidebar state
+    const appMutations = useAppMutations(user?.id);
+
+    // Supabase Auth Listener
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (!parsed.history) parsed.history = [];
-            if (!parsed.watchlist) parsed.watchlist = [];
-            if (!parsed.notes) parsed.notes = [];
-            setDb(parsed);
+        if (!isSupabaseConfigured()) {
+            setAuthLoading(false);
+            return;
         }
+
+        // Mevcut session'i kontrol et
+        AuthService.getSession().then(session => {
+            setUser(session?.user || null);
+            if (session?.user) {
+                setUserName(session.user.user_metadata?.user_name || session.user.email?.split('@')[0] || '');
+            }
+            setAuthLoading(false);
+        });
+
+
+        // Auth değişikliklerini dinle
+        const { data: { subscription } } = AuthService.onAuthStateChange((event, session) => {
+            setUser(session?.user || null);
+            if (session?.user) {
+                setUserName(session.user.user_metadata?.user_name || session.user.email?.split('@')[0] || '');
+            } else {
+                setDb({ series: [], userData: {}, history: [], watchlist: [], notes: [] });
+            }
+            if (event === 'SIGNED_OUT') {
+                setUser(null);
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
+    // React Query Data Fetching
+    const { data: remoteData, isLoading: isUserDataLoading, error: userDataError } = useUserData(user?.id);
+
+    // Sync remote data to local 'db' state
     useEffect(() => {
-        if (db.series.length > 0 || db.notes.length > 0) localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
-    }, [db]);
+        if (remoteData) {
+            // Profil ayarlarını ve user name'i güncelle
+            const { profile } = remoteData;
+            if (profile) {
+                if (profile.user_name) setUserName(profile.user_name);
+                if (profile.rotation_strategy) {
+                    setRotationStrategy(profile.rotation_strategy);
+                    localStorage.setItem('langTracker_rotationStrategy', profile.rotation_strategy);
+                }
+                if (profile.cefr_level) {
+                    setCefrLevel(profile.cefr_level);
+                }
+                if (profile.language_config) {
+                    localStorage.setItem('langTracker_languageConfig', JSON.stringify(profile.language_config));
+                }
+            }
+
+            // DB state'ini güncelle
+            const dbData = { ...remoteData };
+            delete dbData.profile;
+            // setDb from store automatically handles merging
+            setDb(dbData);
+        }
+    }, [remoteData]);
+
+    useEffect(() => {
+        if (isUserDataLoading) setLoadingState("Verileriniz yükleniyor...");
+        else setLoadingState(null);
+    }, [isUserDataLoading]);
+
+    useEffect(() => {
+        if (userDataError) {
+            console.error('Data fetch error:', userDataError);
+            toast.error('Veriler yüklenirken bir hata oluştu');
+        }
+    }, [userDataError]);
+
+
+    // Removed manual localStorage effects - Handled by Zustand persist middleware
 
     // ... existing helper functions (logAction, notes CRUD) ...
-    const logAction = (type, description) => {
+    const logAction = async (type, description) => {
         const newLog = {
             id: Date.now(),
             type,
             description,
             timestamp: new Date().toISOString()
         };
-        setDb(prev => ({
-            ...prev,
-            history: [newLog, ...prev.history].slice(0, 20)
-        }));
-    };
+        addToHistory(newLog);
 
-    // --- NOTES CRUD ---
-    const handleAddNote = (note) => {
-        setDb(prev => ({
-            ...prev,
-            notes: [...prev.notes, { ...note, id: Date.now(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }]
-        }));
-        logAction('ADD', `Yeni not eklendi: ${note.title}`);
-    };
-
-    const handleUpdateNote = (id, updates) => {
-        setDb(prev => ({
-            ...prev,
-            notes: prev.notes.map(n => n.id === id ? { ...n, ...updates, updatedAt: new Date().toISOString() } : n)
-        }));
-    };
-
-    const handleDeleteNote = (id) => {
-        setDb(prev => ({
-            ...prev,
-            notes: prev.notes.filter(n => n.id !== id)
-        }));
-        logAction('DELETE', 'Bir not silindi');
-    };
-
-    // ... existing handleSeriesSelect with difficulty logging if desired ...
-    const handleSeriesSelect = async (show) => {
-        setShowAddModal(false);
-        if (db.series.some(s => s.id === show.id.toString())) {
-            alert('Bu dizi zaten takip listenizde mevcut!');
-            return;
-        }
-
-        setLoadingState("Veri bağlantısı kuruluyor...");
-        try {
-            const details = await TVMazeService.getShowDetails(show.id);
-            if (!details._embedded?.episodes) throw new Error("Bölümler alınamadı.");
-
-            setLoadingState("Sezon matrisi oluşturuluyor...");
-            await new Promise(r => setTimeout(r, 1000));
-
-            const schedule = generateSeasonSchedule(details._embedded.episodes);
-
-            const newSeries = {
-                id: details.id.toString(),
-                name: details.name,
-                image: details.image,
-                episodes: details._embedded.episodes,
-                schedule: schedule,
-                genres: details.genres // Ensure genres are saved
-            };
-
-            setDb(prev => ({
-                ...prev,
-                series: [newSeries, ...prev.series],
-                userData: { ...prev.userData, [newSeries.id]: { completed: {}, notes: {} } }
-            }));
-
-            logAction('ADD', `${newSeries.name} takip listesine eklendi.`);
-            setLoadingState(null);
-        } catch (e) {
-            alert("Hata: " + e.message);
-            setLoadingState(null);
+        if (user) {
+            await ActivityService.logActivity(user.id, type, description);
         }
     };
 
-    const handleUpdate = (seriesId, newData) => {
-        setDb(prev => ({
-            ...prev,
-            userData: { ...prev.userData, [seriesId]: { ...prev.userData[seriesId], ...newData } }
-        }));
-        const seriesName = db.series.find(s => s.id === seriesId)?.name || "Dizi";
-        if (newData.completed) logAction('WATCH', `${seriesName} ilerlemesi güncellendi.`);
-    };
+    // --- HOOKS ---
+    const {
+        handleAddNote,
+        handleUpdateNote,
+        handleDeleteNote
+    } = useNoteManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
 
-    const handleDelete = (e, seriesId) => {
-        e.stopPropagation();
-        setSeriesToDelete(seriesId);
-    };
+    const {
+        handleAddToWatchlist,
+        removeFromWatchlist
+    } = useWatchlistManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
 
-    const confirmDelete = () => {
-        if (seriesToDelete) {
-            const seriesName = db.series.find(s => s.id === seriesToDelete)?.name || "Bir dizi";
-            setDb(prev => ({
-                ...prev,
-                series: prev.series.filter(s => s.id !== seriesToDelete)
-            }));
-            logAction('DELETE', `${seriesName} silindi.`);
-            setSeriesToDelete(null);
-        }
-    };
-
-    // ... watchlist handlers ...
-    const handleAddToWatchlist = (show) => {
-        setShowAddModal(false);
-        if (db.watchlist?.some(s => s.id === show.id) || db.series.some(s => s.id === show.id)) {
-            alert("Bu dizi zaten listenizde veya takibinizde.");
-            return;
-        }
-        const newWatchlistItem = { id: show.id, name: show.name, image: show.image, addedAt: new Date().toISOString() };
-        setDb(prev => ({ ...prev, watchlist: [newWatchlistItem, ...prev.watchlist || []] }));
-        logAction('ADD_WATCHLIST', `${show.name} izleme listesine eklendi.`);
-    };
-
-    const removeFromWatchlist = (showId) => setDb(prev => ({ ...prev, watchlist: (prev.watchlist || []).filter(s => s.id !== showId) }));
+    const {
+        handleSeriesSelect,
+        handleUpdate,
+        handleSeriesSettingsUpdate,
+        openDeleteConfirm: handleDelete,
+        confirmDelete,
+        seriesToDelete,
+        setSeriesToDelete
+    } = useSeriesManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction, rotationStrategy);
 
     const handleStartWatching = async (show) => {
-        removeFromWatchlist(show.id);
+        // Only remove from watchlist if actually in watchlist
+        const isInWatchlist = watchlist?.some(s => s.id === show.id);
+        if (isInWatchlist) {
+            removeFromWatchlist(show.id);
+        }
         await handleSeriesSelect(show);
-    };
-
-    // --- NAVIGATION with HISTORY ---
-    useEffect(() => {
-        const handlePopState = (event) => {
-            if (event.state?.view) {
-                setActiveView(event.state.view);
-                setActiveSeriesId(event.state.seriesId || null);
-            } else {
-                setActiveView('dashboard');
-                setActiveSeriesId(null);
-            }
-        };
-
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, []);
-
-    const navigateTo = (view, seriesId = null) => {
-        setActiveView(view);
-        setActiveSeriesId(seriesId);
-        setSidebarOpen(false);
-        window.history.pushState({ view, seriesId }, '', `?view=${view}`);
+        navigate(`/series/${show.id}`);
     };
 
     const onModalSelect = (show) => {
-        if (activeView === 'watchlist') handleAddToWatchlist(show);
-        else handleSeriesSelect(show);
+        setShowAddModal(false);
+        if (location.pathname === '/watchlist') handleAddToWatchlist(show);
+        else {
+            handleSeriesSelect(show);
+            navigate(`/series/${show.id}`);
+        }
+    };
+
+
+
+    const handleOnboardingComplete = async (formData) => {
+        setShowOnboarding(false);
+        setUserName(formData.userName);
+        setRotationStrategy(formData.rotationStrategy);
+        setCefrLevel(formData.cefrLevel);
+
+        if (user) {
+            try {
+                await ProfileService.upsertProfile(user.id, {
+                    user_name: formData.userName,
+                    rotation_strategy: formData.rotationStrategy,
+                    cefr_level: formData.cefrLevel,
+                    language_config: {
+                        nativeLanguage: formData.nativeLanguage,
+                        targetLanguage: formData.targetLanguage
+                    }
+                });
+            } catch (error) {
+                console.error('Onboarding sync error:', error);
+                toast.error('Profil oluşturulurken hata oluştu');
+            }
+        }
+
+        logAction('WELCOME', `${formData.userName} LangTracker'a katıldı!`);
+        toast.success('Kurulum tamamlandı!');
+    };
+
+
+
+    const handleAuthSuccess = async (authUser) => {
+        setUser(authUser);
+        setUserName(authUser.user_metadata?.user_name || authUser.email?.split('@')[0] || '');
+        // Fetch handled by useQuery hook automatically when user changes
+        logAction('LOGIN', `${authUser.email} giriş yaptı`);
+        toast.success('Giriş başarılı');
     };
 
     return (
         <div className="min-h-screen text-slate-200 font-sans">
-            <AnimatePresence>
-                {loadingState && <LoadingScreen key="loader" status={loadingState} />}
-                {seriesToDelete && (
-                    <ConfirmationModal
-                        key="confirm-modal"
-                        isOpen={!!seriesToDelete}
-                        title="Diziyi Sil"
-                        message="Bu diziyi ve tüm ilerlemeni silmek istediğine emin misin? Bu işlem geri alınamaz."
-                        onConfirm={confirmDelete}
-                        onCancel={() => setSeriesToDelete(null)}
-                    />
-                )}
-            </AnimatePresence>
-            <Sidebar
-                isOpen={isSidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-                onNavigate={navigateTo}
-                activeView={activeView}
-                history={db.history}
+            {/* Onboarding Modal */}
+            <OnboardingModal
+                isOpen={showOnboarding}
+                onComplete={handleOnboardingComplete}
             />
 
-            {activeSeriesId ? (
-                <SeriesDetail
-                    series={db.series.find(s => s.id === activeSeriesId)}
-                    data={db.userData[activeSeriesId] || {}}
-                    onBack={() => setActiveSeriesId(null)}
-                    onUpdate={handleUpdate}
+            {/* Auth Modal */}
+            <AuthModal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                onAuthSuccess={handleAuthSuccess}
+            />
+
+            {/* Email Confirmation Callback */}
+            {showEmailConfirmation && (
+                <EmailConfirmation
+                    onComplete={() => setShowEmailConfirmation(false)}
                 />
-            ) : activeView === 'vocab' ? (
-                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-                    <VocabularyPage db={db} onBack={() => setActiveView('dashboard')} />
-                </div>
-            ) : activeView === 'flashcards' ? (
-                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-                    <FlashcardsPage onBack={() => setActiveView('dashboard')} />
-                </div>
-            ) : activeView === 'notes' ? (
-                <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
-                    <NotesPage
-                        db={db}
-                        onAdd={handleAddNote}
-                        onUpdate={handleUpdateNote}
-                        onDelete={handleDeleteNote}
-                        onBack={() => setActiveView('dashboard')}
-                    />
-                </div>
-            ) : activeView === 'watchlist' ? (
-                <WatchlistPage
-                    watchlist={db.watchlist || []}
-                    onStartWatching={handleStartWatching}
-                    onRemove={removeFromWatchlist}
-                    onAddClick={() => setShowAddModal(true)}
-                />
-            ) : activeView === 'activity_history' ? (
-                <ActivityHistoryPage
-                    history={db.history}
-                    onBack={() => setActiveView('dashboard')}
-                />
-            ) : (
-                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-                    <div className="absolute top-6 right-6 z-50">
-                        <button onClick={() => setSidebarOpen(true)} className="p-4 text-slate-400 hover:text-white hover:bg-white/5 rounded-full transition-all">
-                            <Menu size={32} />
-                        </button>
-                    </div>
-
-                    <div className="cinematic-bg" style={{
-                        backgroundImage: db.series[0]?.image?.original ? `url(${db.series[0].image.original})` : 'none',
-                        opacity: 0.2
-                    }}></div>
-
-                    <header className="flex justify-between items-end mb-16">
-                        <div>
-                            <h1 className="text-6xl md:text-8xl font-codon font-bold text-white tracking-widest drop-shadow-[0_0_25px_rgba(186,230,253,0.3)] animate-float">
-                                LANG<span className="text-transparent bg-clip-text bg-[linear-gradient(to_right,#bae6fd,#e0f2fe,#a5f3fc,#bae6fd)] bg-[length:200%_auto] animate-shimmer-slow">TRACKER</span>
-                            </h1>
-                            <p className="text-slate-400 mt-2 text-lg font-light tracking-wide">Watch, Learn, Track.</p>
-                        </div>
-                    </header>
-
-                    {/* Styled FAB for Add Series */}
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 group flex items-center justify-center p-1 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-[0_0_30px_rgba(99,102,241,0.4)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] transition-all duration-500 hover:scale-110 active:scale-95"
-                    >
-                        <div className="bg-[#0F1218] rounded-full p-4 flex items-center gap-3 transition-all group-hover:bg-transparent">
-                            <Plus size={32} className="text-white group-hover:rotate-90 transition-transform duration-500" />
-                            <span className="hidden group-hover:inline-block font-bold text-white whitespace-nowrap pr-2 animate-fade-in">
-                                YENİ DİZİ EKLE
-                            </span>
-                        </div>
-                    </button>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {db.series.map(series => {
-                            const total = series.schedule.reduce((acc, s) => acc + s.tours.reduce((ta, t) => ta + t.weeks.reduce((wa, w) => wa + w.days.filter(d => d.epId).length, 0), 0), 0);
-                            const completed = Object.keys(db.userData[series.id]?.completed || {}).length;
-                            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-                            const difficulty = estimateDifficulty(series); // Estimate for dashboard card
-
-                            return (
-                                <div key={series.id} onClick={() => setActiveSeriesId(series.id)}
-                                    className="glass-panel rounded-3xl p-6 cursor-pointer hover:border-indigo-500/50 transition-all h-[400px] flex flex-col justify-end relative overflow-hidden group">
-                                    {series.image?.original && (
-                                        <div className="absolute inset-0">
-                                            <img src={series.image.original} className="w-full h-full object-cover opacity-50 group-hover:opacity-40 transition-opacity" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-                                        </div>
-                                    )}
-                                    <div className="relative z-10">
-                                        <div className="absolute top-[-300px] right-[-10px] opacity-0 group-hover:opacity-100 transition-all duration-500 transform group-hover:translate-y-4">
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-lg text-white ${difficulty.color}`}>
-                                                {difficulty.text}
-                                            </span>
-                                        </div>
-                                        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={(e) => handleDelete(e, series.id)} className="p-2 bg-black/50 rounded-full hover:bg-rose-500 hover:text-white transition-colors">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                        <h3 className="text-3xl font-display font-bold text-white mb-2">{series.name}</h3>
-                                        <div className="flex justify-between items-center text-sm text-slate-400 mb-2">
-                                            <span>İlerleme</span>
-                                            <span>%{pct}</span>
-                                        </div>
-                                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                            <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500" style={{ width: `${pct}%` }}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {db.series.length === 0 && (
-                            <div className="col-span-full py-32 text-center border border-dashed border-white/10 rounded-3xl bg-white/5 backdrop-blur-sm">
-                                <Database size={64} className="mx-auto text-white/20 mb-6" />
-                                <h3 className="text-2xl font-display font-bold text-white mb-2">Veri Akışı Yok</h3>
-                                <p className="text-slate-400 max-w-md mx-auto">Sistem boşta. Öğrenme protokolünü başlatmak için sağ alttaki butonu kullanın.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <RecommendationsSection onStart={handleStartWatching} onWatchlist={handleAddToWatchlist} watchlist={db.watchlist} />
-                </div>
             )}
-            <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />
+
+            {/* Mandatory Login Check */}
+            {!user && !isAuthLoading && !showEmailConfirmation && (
+                <LoginRequired onShowAuth={() => setShowAuthModal(true)} />
+            )}
+
+            {user && (
+                <>
+                    <AnimatePresence>
+                        {loadingState && <LoadingScreen key="loader" status={loadingState} />}
+                        {seriesToDelete && (
+                            <ConfirmationModal
+                                key="confirm-modal"
+                                isOpen={!!seriesToDelete}
+                                title="Diziyi Sil"
+                                message="Bu diziyi ve tüm ilerlemeni silmek istediğine emin misin? Bu işlem geri alınamaz."
+                                onConfirm={confirmDelete}
+                                onCancel={() => setSeriesToDelete(null)}
+                            />
+                        )}
+                    </AnimatePresence>
+                    <MainLayout>
+                        <Routes>
+                            <Route path="/" element={
+                                <Dashboard
+                                    onSeriesClick={(id) => navigate(`/series/${id}`)}
+                                    onAddClick={() => setShowAddModal(true)}
+                                    // onDeleteSeries needs id param now if not passed directly. Dashboard passes (e, id) -> onDeleteSeries(e, id)
+                                    onDeleteSeries={handleDelete}
+                                    onStartWatching={handleStartWatching}
+                                    onAddToWatchlist={handleAddToWatchlist}
+                                />
+                            } />
+
+                            <Route path="/series/:seriesId" element={
+                                <SeriesDetail
+                                    seriesList={series}
+                                    data={userData}
+                                    onUpdate={handleUpdate}
+                                    onSeriesSettingsUpdate={handleSeriesSettingsUpdate}
+                                />
+                            } />
+
+                            <Route path="/vocab" element={
+                                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                                    <VocabularyPage />
+                                </div>
+                            } />
+
+                            <Route path="/flashcards" element={
+                                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                                    <FlashcardsPage />
+                                </div>
+                            } />
+
+                            <Route path="/notes" element={
+                                <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
+                                    <NotesPage
+                                        onAdd={handleAddNote}
+                                        onUpdate={handleUpdateNote}
+                                        onDelete={handleDeleteNote}
+                                    />
+                                </div>
+                            } />
+
+                            <Route path="/watchlist" element={
+                                <WatchlistPage
+                                    onStartWatching={handleStartWatching}
+                                    onRemove={removeFromWatchlist}
+                                    onAddClick={() => setShowAddModal(true)}
+                                />
+                            } />
+
+                            <Route path="/history" element={
+                                <ActivityHistoryPage />
+                            } />
+
+                            <Route path="/settings" element={
+                                <SettingsPage />
+                            } />
+
+                            <Route path="/trakt-callback" element={
+                                <TraktCallback />
+                            } />
+
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+
+                        <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />
+                    </MainLayout>
+                </>
+            )}
         </div>
     );
 }
 
 export default App;
+
