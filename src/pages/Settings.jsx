@@ -16,7 +16,8 @@ import { useAppStore } from '../store/useAppStore';
 const SettingsPage = () => {
     const {
         user, userName,
-        rotationStrategy, setRotationStrategy
+        rotationStrategy, setRotationStrategy,
+        series, notes, userData, watchlist, cefrLevel
     } = useAppStore();
     const [activeSection, setActiveSection] = useState('profile');
     const [langConfig, setLangConfig] = useState(getLanguageConfig());
@@ -41,6 +42,38 @@ const SettingsPage = () => {
 
     // Email onay durumu
     const isEmailConfirmed = user?.confirmed_at || user?.email_confirmed_at;
+
+    // İstatistikleri hesapla
+    const stats = React.useMemo(() => {
+        let totalEpisodes = 0;
+        let completedEpisodes = 0;
+        let totalVocabulary = 0;
+
+        (series || []).forEach(s => {
+            const total = s.schedule
+                ?.flatMap(sch => sch.tours)
+                ?.flatMap(t => t.weeks)
+                ?.flatMap(w => w.days)
+                ?.filter(d => d.epId).length || 0;
+
+            const completed = Object.keys(userData?.[s.id]?.completed || {}).length;
+            const vocab = Object.values(userData?.[s.id]?.vocabulary || {}).flat().length;
+
+            totalEpisodes += total;
+            completedEpisodes += completed;
+            totalVocabulary += vocab;
+        });
+
+        return {
+            totalSeries: series?.length || 0,
+            totalEpisodes,
+            completedEpisodes,
+            overallProgress: totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0,
+            totalNotes: notes?.length || 0,
+            totalVocabulary,
+            watchlistCount: watchlist?.length || 0
+        };
+    }, [series, userData, notes, watchlist]);
 
     const handleLanguageChange = async (field, value) => {
         const newConfig = { ...langConfig, [field]: value };
@@ -229,6 +262,60 @@ const SettingsPage = () => {
                                         : 'Veriler sadece bu cihazda saklanıyor'
                                     }
                                 </p>
+                            </div>
+                        </div>
+
+                        {/* Statistics Section */}
+                        <div className="glass-panel rounded-3xl p-6 border-white/10">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <Database size={18} className="text-indigo-400" />
+                                İstatistikler
+                            </h3>
+
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                                <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 text-center">
+                                    <div className="text-2xl font-bold text-white">{stats.totalSeries}</div>
+                                    <div className="text-[10px] text-indigo-400 uppercase tracking-wider">Aktif Dizi</div>
+                                </div>
+                                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-center">
+                                    <div className="text-2xl font-bold text-white">{stats.completedEpisodes}<span className="text-sm text-slate-500">/{stats.totalEpisodes}</span></div>
+                                    <div className="text-[10px] text-purple-400 uppercase tracking-wider">İzlenen Bölüm</div>
+                                </div>
+                                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
+                                    <div className="text-2xl font-bold text-white">{stats.totalVocabulary}</div>
+                                    <div className="text-[10px] text-emerald-400 uppercase tracking-wider">Kelime</div>
+                                </div>
+                                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 text-center">
+                                    <div className="text-2xl font-bold text-white">{stats.totalNotes}</div>
+                                    <div className="text-[10px] text-amber-400 uppercase tracking-wider">Not</div>
+                                </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/5">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm text-slate-400">Genel İlerleme</span>
+                                    <span className="text-lg font-bold text-white">%{stats.overallProgress}</span>
+                                </div>
+                                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${stats.overallProgress}%` }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Additional Info */}
+                            <div className="mt-4 flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2 text-slate-400">
+                                    <span>İzleme Listesi:</span>
+                                    <span className="text-white font-medium">{stats.watchlistCount} dizi</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-slate-400">
+                                    <span>CEFR Seviyesi:</span>
+                                    <span className="text-indigo-400 font-bold">{cefrLevel || 'B1'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
