@@ -244,7 +244,7 @@ const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpd
                                     ) : (
                                         <div className="w-full h-full bg-white/5 flex items-center justify-center text-slate-500">Görsel Yok</div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#05070a] to-transparent"></div>
+                                    <div className="absolute inset-x-0 -bottom-1 top-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/60 to-transparent"></div>
 
                                     <button
                                         onClick={onClose}
