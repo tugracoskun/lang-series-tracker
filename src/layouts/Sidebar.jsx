@@ -171,26 +171,6 @@ const SidebarContent = ({
 }) => {
     const navigate = useNavigate();
 
-    const getRelativeTime = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
-
-        if (diffInSeconds < 60) return "Az önce";
-        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}dk önce`;
-        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}s önce`;
-        return `${Math.floor(diffInSeconds / 86400)}g önce`;
-    };
-
-    const getActionIcon = (type) => {
-        switch (type) {
-            case 'ADD': return <PlusCircle size={12} className="text-emerald-400" />;
-            case 'DELETE': return <Trash2 size={12} className="text-rose-400" />;
-            case 'WATCH': return <CheckCircle size={12} className="text-indigo-400" />;
-            default: return <Activity size={12} className="text-slate-400" />;
-        }
-    };
-
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
         { id: 'vocab', label: 'Kelime Defteri', icon: BookOpen, path: '/vocab' },
@@ -204,92 +184,33 @@ const SidebarContent = ({
     return (
         <div className="h-full flex flex-col">
             {/* Header / Branding */}
-            <div className={`p-6 border-b border-white/5 flex items-center justify-center ${compact ? 'flex-col gap-4' : 'justify-between'}`}>
+            <div className={`p-4 border-b border-white/5 flex items-center ${compact ? 'justify-center' : 'justify-between'}`}>
                 <button
-                    className="flex items-center gap-3 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 text-left"
+                    className="flex items-center gap-2 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 text-left"
                     onClick={() => navigate('/')}
                 >
-                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-                        <span className="text-white font-black font-codon text-xl">L</span>
+                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                        <span className="text-white font-black font-codon text-sm">L</span>
                     </div>
                     {!compact && (
-                        <div>
-                            <h1 className="text-lg font-codon font-black text-white tracking-widest">LANG<span className="text-indigo-400">TRACKER</span></h1>
-                        </div>
+                        <h1 className="text-sm font-codon font-black text-white tracking-widest">LANG<span className="text-indigo-400">TRACKER</span></h1>
                     )}
                 </button>
                 {showHeader && !compact && (
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
                         aria-label="Kapat"
                     >
-                        <X size={20} />
+                        <X size={18} />
                     </button>
                 )}
             </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 custom-scrollbar">
-                {/* User Profile Card */}
-                <div className="mb-6">
-                    <div className="relative group overflow-hidden rounded-xl p-[1px] bg-gradient-to-br from-white/10 to-transparent hover:from-indigo-500/50 hover:to-purple-500/50 transition-all duration-500">
-                        <div className="relative bg-[#0F1218]/40 backdrop-blur-md p-4 rounded-xl transition-colors group-hover:bg-[#181B24]/60">
-                            <div className={`flex items-center ${compact ? 'justify-center' : 'gap-3'}`}>
-                                <div className="relative">
-                                    <div className={`${compact ? 'w-10 h-10 text-xs' : 'w-12 h-12 text-base'} rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 font-black font-codon ${user
-                                        ? 'bg-gradient-to-tr from-emerald-500 to-teal-600'
-                                        : 'bg-gradient-to-tr from-indigo-500 to-purple-600'
-                                        }`}>
-                                        {userName?.charAt(0).toUpperCase() || <User size={compact ? 16 : 20} />}
-                                    </div>
-                                    {/* CEFR Badge on Avatar */}
-                                    {user && (
-                                        <div className="absolute -bottom-1 -right-1 bg-[#13161C] border border-white/10 rounded-md px-1 py-0.5 text-[8px] font-black text-indigo-400">
-                                            {cefrLevel || 'B1'}
-                                        </div>
-                                    )}
-                                </div>
-                                {!compact && (
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-white font-bold truncate">
-                                            {userName || (user?.email?.split('@')[0]) || 'Misafir'}
-                                        </div>
-                                        <div className="text-xs text-slate-400 truncate">
-                                            {user ? user.email : 'Giriş yapılmadı'}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Login/Logout Button */}
-                            {!compact && (
-                                <div className="mt-3 pt-3 border-t border-white/5">
-                                    {user ? (
-                                        <button
-                                            onClick={onSignOut}
-                                            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                                        >
-                                            <LogOut size={16} />
-                                            Çıkış Yap
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={onShowAuth}
-                                            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors"
-                                        >
-                                            <LogIn size={16} />
-                                            Giriş Yap
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation Links */}
-                <nav className="space-y-1">
+            {/* Scrollable Content - Navigation */}
+            <div className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar">
+                {/* Navigation Links - Compact */}
+                <nav className="space-y-0.5">
                     {menuItems.map(item => {
                         const Icon = item.icon;
                         const isActive = activeView === item.id;
@@ -300,84 +221,77 @@ const SidebarContent = ({
                                     navigate(item.path);
                                     if (!isDesktop) onClose();
                                 }}
-                                className={`w-full flex items-center ${compact ? 'justify-center' : 'gap-3'} px-4 py-3 rounded-xl transition-all ${isActive
-                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                                    : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'
+                                className={`w-full flex items-center ${compact ? 'justify-center' : 'gap-2.5'} px-3 py-2 rounded-lg transition-all text-sm ${isActive
+                                    ? 'bg-indigo-500/15 text-indigo-300'
+                                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                     }`}
                                 title={compact ? item.label : undefined}
                             >
-                                <Icon size={20} />
+                                <Icon size={16} className={isActive ? 'text-indigo-400' : ''} />
                                 {!compact && <span className="font-medium">{item.label}</span>}
                             </button>
                         );
                     })}
                 </nav>
 
-                {/* Internal Stats Header (Only when not collapsed) */}
+                {/* Mini Stats - Inline, only when not compact */}
                 {!compact && (
-                    <div className="mt-8 px-2 space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 hover:bg-white/[0.04] transition-colors">
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Diziler</div>
-                                <div className="text-xl font-codon text-white">{series?.length || 0}</div>
+                    <div className="mt-6 px-1">
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 py-2 px-2 bg-white/[0.02] rounded-lg border border-white/5">
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-white">{series?.length || 0}</span>
+                                <span>dizi</span>
                             </div>
-                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3 hover:bg-white/[0.04] transition-colors">
-                                <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Notlar</div>
-                                <div className="text-xl font-codon text-white">{notes?.length || 0}</div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-white">{notes?.length || 0}</span>
+                                <span>not</span>
                             </div>
-                        </div>
-                        <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 border border-indigo-500/20 rounded-2xl p-3 flex items-center justify-between">
-                            <div>
-                                <div className="text-[10px] text-indigo-400 font-black uppercase tracking-widest mb-0.5">Mevcut Seviye</div>
-                                <div className="text-lg font-black text-white font-codon leading-none">{cefrLevel || 'B1'}</div>
+                            <div className="w-px h-3 bg-white/10" />
+                            <div className="flex items-center gap-1.5">
+                                <GraduationCap size={10} className="text-indigo-400" />
+                                <span className="font-bold text-indigo-400">{cefrLevel || 'B1'}</span>
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-indigo-400">
-                                <GraduationCap size={20} />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Recent Activity Section */}
-                {!compact && history && history.length > 0 && (
-                    <div className="mt-8 pt-6 border-t border-white/5">
-                        <div className="flex items-center justify-between mb-4 px-2">
-                            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                                <Activity size={12} className="text-indigo-500" />
-                                Canlı Akış
-                            </h3>
-                            <button
-                                onClick={() => navigate('/history')}
-                                className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold uppercase transition-colors"
-                            >
-                                Hepsi
-                            </button>
-                        </div>
-                        <div className="space-y-3">
-                            {history.slice(0, 3).map(log => (
-                                <div key={log.id} className="group flex gap-3 items-center p-2 rounded-xl hover:bg-white/[0.03] transition-all border border-transparent hover:border-white/5">
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                        {getActionIcon(log.type)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-xs text-slate-300 truncate font-medium">
-                                            {log.description}
-                                        </div>
-                                        <div className="text-[10px] text-slate-600 font-mono">
-                                            {getRelativeTime(log.timestamp)}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-white/5">
-                <div className="text-center text-[10px] text-slate-800 font-mono tracking-widest">
-                    v1.0.0
+            {/* User Profile - Bottom */}
+            <div className="border-t border-white/5 p-3">
+                <div className={`flex items-center ${compact ? 'justify-center' : 'gap-2.5'}`}>
+                    {/* Avatar */}
+                    <div className="relative flex-shrink-0">
+                        <div className={`${compact ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm'} rounded-lg flex items-center justify-center text-white font-bold ${user
+                            ? 'bg-gradient-to-tr from-emerald-500 to-teal-600'
+                            : 'bg-gradient-to-tr from-slate-600 to-slate-700'
+                            }`}>
+                            {userName?.charAt(0).toUpperCase() || <User size={compact ? 14 : 16} />}
+                        </div>
+                    </div>
+
+                    {!compact && (
+                        <div className="flex-1 min-w-0">
+                            <div className="text-sm text-white font-medium truncate">
+                                {userName || (user?.email?.split('@')[0]) || 'Misafir'}
+                            </div>
+                            {user ? (
+                                <button
+                                    onClick={onSignOut}
+                                    className="text-[10px] text-slate-500 hover:text-rose-400 transition-colors"
+                                >
+                                    Çıkış Yap
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={onShowAuth}
+                                    className="text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors"
+                                >
+                                    Giriş Yap
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
