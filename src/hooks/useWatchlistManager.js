@@ -3,8 +3,19 @@ import { toast } from 'sonner';
 export const useWatchlistManager = (user, db, setDb, appMutations, logAction) => {
 
     const handleAddToWatchlist = async (show) => {
-        if (db.watchlist?.some(s => s.id === show.id) || db.series.some(s => s.id === show.id)) {
-            toast.info("Bu dizi zaten listenizde veya takibinizde.");
+        const showIdStr = show.id?.toString();
+
+        // Aktif olarak izlenen dizilerde mi kontrol et
+        const isActivelyWatching = db.series.some(s => s.id?.toString() === showIdStr);
+        if (isActivelyWatching) {
+            toast.info("Bu diziyi zaten izliyorsun!");
+            return;
+        }
+
+        // Watchlist'te zaten var mı kontrol et
+        const isInWatchlist = db.watchlist?.some(s => s.id?.toString() === showIdStr);
+        if (isInWatchlist) {
+            toast.info("Bu dizi zaten izleme listende.");
             return;
         }
 
