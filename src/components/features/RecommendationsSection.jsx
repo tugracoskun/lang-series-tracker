@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    ChevronLeft, ChevronRight, PlusCircle, Loader, CalendarPlus,
+    ChevronLeft, ChevronRight, Clock, Loader, CalendarPlus,
     ImageOff, Check, GraduationCap,
     Sprout, Leaf, TreeDeciduous, TreePine, Mountain, MountainSnow
 } from 'lucide-react';
@@ -56,17 +56,25 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
             )}
 
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <button
-                    onClick={(e) => { e.stopPropagation(); onWatchlist(show); }}
-                    className={`p-1 rounded-full transition-colors ${isInWatchlist ? 'bg-emerald-500/80 hover:bg-emerald-600' : 'hover:bg-black/50'}`}
-                    title={isInWatchlist ? "Listede Var" : "İzleme Listesine Ekle"}
-                >
-                    {isInWatchlist ? (
-                        <Check className="text-white drop-shadow-md" size={24} />
-                    ) : (
-                        <PlusCircle className="text-white drop-shadow-md hover:text-indigo-400 transition-colors" size={24} />
-                    )}
-                </button>
+                <div className="relative group/tooltip">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onWatchlist(show); }}
+                        className={`p-1.5 rounded-full transition-all duration-200 ${isInWatchlist
+                            ? 'bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/30'
+                            : 'bg-black/40 hover:bg-indigo-600 backdrop-blur-sm'}`}
+                    >
+                        {isInWatchlist ? (
+                            <Check className="text-white" size={18} />
+                        ) : (
+                            <Clock className="text-white" size={18} />
+                        )}
+                    </button>
+                    {/* Custom Tooltip */}
+                    <div className="absolute right-0 top-full mt-2 px-3 py-1.5 bg-slate-900/95 backdrop-blur-md text-white text-[10px] font-medium rounded-lg whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-opacity duration-200 border border-white/10 shadow-xl">
+                        {isInWatchlist ? '✓ Listede' : 'Daha Sonra İzle'}
+                        <div className="absolute -top-1 right-3 w-2 h-2 bg-slate-900/95 border-l border-t border-white/10 transform rotate-45" />
+                    </div>
+                </div>
             </div>
 
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
