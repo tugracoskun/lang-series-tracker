@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Menu, Search, Loader, Sparkles, GraduationCap, CheckCircle, Play, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Menu, Search, Loader, Sparkles, GraduationCap, CheckCircle, ArrowRight, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import RecommendationsSection from '../components/features/RecommendationsSection';
@@ -327,8 +327,8 @@ const SeriesCard = ({ series: s, userData, onSeriesClick, onDeleteSeries, index 
                         {/* Hover Action */}
                         <div className="mt-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
                             <div className="flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-md rounded-xl text-white text-sm font-medium">
-                                <Play size={14} fill="currentColor" />
-                                <span>Devam Et</span>
+                                <ArrowRight size={14} />
+                                <span>Görüntüle</span>
                             </div>
                         </div>
                     </div>

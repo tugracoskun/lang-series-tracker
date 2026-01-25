@@ -1,4 +1,4 @@
-import { Play, Trash2, Bookmark, Plus } from 'lucide-react';
+import { CalendarPlus, Trash2, Bookmark, Plus } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useAppStore } from '../store/useAppStore';
 
@@ -61,7 +61,7 @@ const WatchlistPage = ({ onStartWatching, onRemove, onAddClick }) => {
                                         onClick={() => onStartWatching(show)}
                                         className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold rounded-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-indigo-600/20"
                                     >
-                                        <Play size={14} fill="currentColor" /> Başla
+                                        <CalendarPlus size={14} /> Takip Et
                                     </button>
                                     <button
                                         onClick={() => onRemove(show.id)}

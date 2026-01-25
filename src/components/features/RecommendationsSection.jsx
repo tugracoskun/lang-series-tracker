@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-    ChevronLeft, ChevronRight, PlusCircle, Info, Loader, Play, Clock,
-    ImageOff, Check, CheckCircle, GraduationCap,
+    ChevronLeft, ChevronRight, PlusCircle, Loader, CalendarPlus,
+    ImageOff, Check, GraduationCap,
     Sprout, Leaf, TreeDeciduous, TreePine, Mountain, MountainSnow
 } from 'lucide-react';
 import { TVMazeService } from '../../services/TVMazeService';
@@ -69,22 +69,12 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
                 </button>
             </div>
 
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                 <button
                     onClick={() => onStart(show)}
-                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg"
+                    className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg"
                 >
-                    <Play size={14} fill="currentColor" /> BAŞLA
-                </button>
-                <button
-                    onClick={() => onWatchlist(show)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 ${isInWatchlist
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
-                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                        }`}
-                >
-                    {isInWatchlist ? <CheckCircle size={14} /> : <Clock size={14} />}
-                    {isInWatchlist ? 'LİSTEDE' : 'LİSTE'}
+                    <CalendarPlus size={14} /> DİZİYE BAŞLA
                 </button>
             </div>
 
