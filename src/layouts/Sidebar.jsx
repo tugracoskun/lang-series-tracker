@@ -184,22 +184,22 @@ const SidebarContent = ({
     return (
         <div className="h-full flex flex-col">
             {/* Header / Branding */}
-            <div className={`p-4 border-b border-white/5 flex items-center ${compact ? 'justify-center' : 'justify-between'}`}>
+            <div className={`p-5 border-b border-white/5 flex items-center ${compact ? 'justify-center' : 'justify-between'}`}>
                 <button
-                    className="flex items-center gap-2 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 text-left"
+                    className="flex items-center gap-2.5 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-lg p-1 text-left"
                     onClick={() => navigate('/')}
                 >
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-                        <span className="text-white font-black font-codon text-sm">L</span>
+                    <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                        <span className="text-white font-black font-codon text-base">L</span>
                     </div>
                     {!compact && (
-                        <h1 className="text-sm font-codon font-black text-white tracking-widest">LANG<span className="text-indigo-400">TRACKER</span></h1>
+                        <h1 className="text-base font-codon font-black text-white tracking-widest">LANG<span className="text-indigo-400">TRACKER</span></h1>
                     )}
                 </button>
                 {showHeader && !compact && (
                     <button
                         onClick={onClose}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
+                        className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors lg:hidden"
                         aria-label="Kapat"
                     >
                         <X size={18} />
@@ -208,9 +208,9 @@ const SidebarContent = ({
             </div>
 
             {/* Scrollable Content - Navigation */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar">
-                {/* Navigation Links - Compact */}
-                <nav className="space-y-0.5">
+            <div className="flex-1 overflow-y-auto px-3 py-4 custom-scrollbar">
+                {/* Navigation Links */}
+                <nav className="space-y-1">
                     {menuItems.map(item => {
                         const Icon = item.icon;
                         const isActive = activeView === item.id;
@@ -221,78 +221,92 @@ const SidebarContent = ({
                                     navigate(item.path);
                                     if (!isDesktop) onClose();
                                 }}
-                                className={`w-full flex items-center ${compact ? 'justify-center' : 'gap-2.5'} px-3 py-2 rounded-lg transition-all text-sm ${isActive
+                                className={`w-full flex items-center ${compact ? 'justify-center' : 'gap-3'} px-3 py-2.5 rounded-xl transition-all ${isActive
                                     ? 'bg-indigo-500/15 text-indigo-300'
                                     : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                     }`}
                                 title={compact ? item.label : undefined}
                             >
-                                <Icon size={16} className={isActive ? 'text-indigo-400' : ''} />
-                                {!compact && <span className="font-medium">{item.label}</span>}
+                                <Icon size={18} className={isActive ? 'text-indigo-400' : ''} />
+                                {!compact && <span className="font-medium text-sm">{item.label}</span>}
                             </button>
                         );
                     })}
                 </nav>
-
-                {/* Mini Stats - Inline, only when not compact */}
-                {!compact && (
-                    <div className="mt-6 px-1">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 py-2 px-2 bg-white/[0.02] rounded-lg border border-white/5">
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-white">{series?.length || 0}</span>
-                                <span>dizi</span>
-                            </div>
-                            <div className="w-px h-3 bg-white/10" />
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-white">{notes?.length || 0}</span>
-                                <span>not</span>
-                            </div>
-                            <div className="w-px h-3 bg-white/10" />
-                            <div className="flex items-center gap-1.5">
-                                <GraduationCap size={10} className="text-indigo-400" />
-                                <span className="font-bold text-indigo-400">{cefrLevel || 'B1'}</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
 
-            {/* User Profile - Bottom */}
+            {/* User Profile - Bottom with Stats */}
             <div className="border-t border-white/5 p-3">
-                <div className={`flex items-center ${compact ? 'justify-center' : 'gap-2.5'}`}>
+                {/* Profile Row - Clickable */}
+                <button
+                    onClick={() => {
+                        navigate('/settings');
+                        if (!isDesktop) onClose();
+                    }}
+                    className={`w-full flex items-center ${compact ? 'justify-center' : 'gap-3'} p-2 rounded-xl hover:bg-white/5 transition-colors group`}
+                >
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
-                        <div className={`${compact ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm'} rounded-lg flex items-center justify-center text-white font-bold ${user
+                        <div className={`${compact ? 'w-9 h-9 text-sm' : 'w-10 h-10 text-base'} rounded-xl flex items-center justify-center text-white font-bold transition-transform group-hover:scale-105 ${user
                             ? 'bg-gradient-to-tr from-emerald-500 to-teal-600'
                             : 'bg-gradient-to-tr from-slate-600 to-slate-700'
                             }`}>
-                            {userName?.charAt(0).toUpperCase() || <User size={compact ? 14 : 16} />}
+                            {userName?.charAt(0).toUpperCase() || <User size={compact ? 16 : 18} />}
                         </div>
                     </div>
 
                     {!compact && (
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 text-left">
                             <div className="text-sm text-white font-medium truncate">
                                 {userName || (user?.email?.split('@')[0]) || 'Misafir'}
                             </div>
-                            {user ? (
-                                <button
-                                    onClick={onSignOut}
-                                    className="text-[10px] text-slate-500 hover:text-rose-400 transition-colors"
-                                >
-                                    Çıkış Yap
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={onShowAuth}
-                                    className="text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors"
-                                >
-                                    Giriş Yap
-                                </button>
-                            )}
+                            <div className="text-[10px] text-slate-500 truncate">
+                                {user ? 'Profili görüntüle' : 'Giriş yap'}
+                            </div>
                         </div>
                     )}
-                </div>
+                </button>
+
+                {/* Mini Stats - Inside Profile Section */}
+                {!compact && (
+                    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-500 py-2 px-3 bg-white/[0.02] rounded-lg border border-white/5">
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white">{series?.length || 0}</span>
+                            <span>dizi</span>
+                        </div>
+                        <div className="w-px h-3 bg-white/10" />
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white">{notes?.length || 0}</span>
+                            <span>not</span>
+                        </div>
+                        <div className="w-px h-3 bg-white/10" />
+                        <div className="flex items-center gap-1.5">
+                            <GraduationCap size={10} className="text-indigo-400" />
+                            <span className="font-bold text-indigo-400">{cefrLevel || 'B1'}</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Auth Button - Separate */}
+                {!compact && (
+                    <div className="mt-2">
+                        {user ? (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onSignOut(); }}
+                                className="w-full text-center py-2 text-xs text-slate-500 hover:text-rose-400 hover:bg-rose-500/5 rounded-lg transition-colors"
+                            >
+                                Çıkış Yap
+                            </button>
+                        ) : (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onShowAuth(); }}
+                                className="w-full text-center py-2 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-lg transition-colors"
+                            >
+                                Giriş Yap
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
