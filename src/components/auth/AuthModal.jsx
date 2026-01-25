@@ -107,12 +107,11 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
             throw new Error('Bu email zaten kayıtlı');
         }
 
-        if (result.user && !result.user.confirmed_at) {
-            setRegisteredEmail(formData.email);
-            setShowEmailSent(true);
-        } else {
-            setSuccess('Kayıt başarılı! Giriş yapabilirsiniz.');
-            setTimeout(() => setMode('login'), 2000);
+        // Kayıt başarılı - direkt giriş yap
+        if (result.user) {
+            // Supabase otomatik olarak session oluşturur, onAuthSuccess'i çağır
+            onAuthSuccess?.(result.user);
+            onClose();
         }
     };
 

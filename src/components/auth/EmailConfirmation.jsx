@@ -250,8 +250,15 @@ export const EmailSentModal = ({ isOpen, email, onClose, onResend }) => {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-3xl bg-[#0F1218] text-left align-middle shadow-xl transition-all">
-                                <div className="glass-panel p-8 text-center">
+                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-3xl bg-[#0F1218] border border-white/10 text-left align-middle shadow-xl transition-all">
+                                {/* Animated Background Blobs */}
+                                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                                    <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px] animate-pulse" />
+                                    <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
+                                </div>
+
+                                {/* Content */}
+                                <div className="relative z-10 p-8 text-center">
                                     {/* Mail Icon */}
                                     <motion.div
                                         initial={{ scale: 0 }}
@@ -262,7 +269,7 @@ export const EmailSentModal = ({ isOpen, email, onClose, onResend }) => {
                                         <Mail size={40} className="text-indigo-400" />
                                     </motion.div>
 
-                                    <Dialog.Title as="h2" className="text-2xl font-display font-bold text-white mb-2">
+                                    <Dialog.Title as="h2" className="text-2xl font-bold text-white mb-2">
                                         Email'ini Kontrol Et!
                                     </Dialog.Title>
 
@@ -270,7 +277,7 @@ export const EmailSentModal = ({ isOpen, email, onClose, onResend }) => {
                                         <p className="text-slate-400 mb-2">
                                             Hesabını aktifleştirmek için
                                         </p>
-                                        <p className="text-indigo-400 font-medium mb-6">
+                                        <p className="text-indigo-400 font-medium mb-4 break-all">
                                             {email}
                                         </p>
                                         <p className="text-slate-400 text-sm mb-6">
@@ -302,7 +309,7 @@ export const EmailSentModal = ({ isOpen, email, onClose, onResend }) => {
 
                                         <button
                                             onClick={onClose}
-                                            className="w-full py-3 text-slate-400 hover:text-white transition-colors"
+                                            className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-bold rounded-xl hover:opacity-90 transition-opacity"
                                         >
                                             Tamam, kontrol edeceğim
                                         </button>

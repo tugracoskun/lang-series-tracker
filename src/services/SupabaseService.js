@@ -38,7 +38,8 @@ export const AuthService = {
             options: {
                 data: {
                     user_name: userName,
-                }
+                },
+                emailRedirectTo: `${window.location.origin}`
             }
         });
 
