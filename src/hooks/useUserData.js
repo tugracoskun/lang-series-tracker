@@ -89,7 +89,7 @@ export const useUserData = (userId) => {
                 watchlist: watchlist.map(w => ({
                     id: w.tvmaze_id,
                     name: w.name,
-                    image: { medium: w.image_url },
+                    image: { medium: w.image_url, original: w.image_url },
                     addedAt: w.added_at
                 })),
                 history: activity.map(a => ({

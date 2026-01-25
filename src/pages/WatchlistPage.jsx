@@ -41,9 +41,9 @@ const WatchlistPage = ({ onStartWatching, onRemove, onAddClick }) => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {watchlist.map(show => (
                         <div key={show.id} className="glass-panel group relative aspect-[2/3] rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-all">
-                            {show.image?.original ? (
+                            {(show.image?.original || show.image?.medium) ? (
                                 <img
-                                    src={show.image.original}
+                                    src={show.image.original || show.image.medium}
                                     className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-300"
                                     alt={show.name}
                                 />

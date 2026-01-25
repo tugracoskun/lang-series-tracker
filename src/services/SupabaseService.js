@@ -564,7 +564,7 @@ export const WatchlistService = {
                 user_id: userId,
                 tvmaze_id: show.id,
                 name: show.name,
-                image_url: show.image?.medium || null
+                image_url: show.image?.original || show.image?.medium || null
             })
             .select()
             .single();
