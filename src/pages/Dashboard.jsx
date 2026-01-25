@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Menu, Search, Loader, Clock, Sparkles, GraduationCap, CheckCircle, Play, TrendingUp, BookOpen, Target, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Menu, Search, Loader, Sparkles, GraduationCap, CheckCircle, Play, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import RecommendationsSection from '../components/features/RecommendationsSection';
@@ -48,7 +48,7 @@ const Dashboard = ({
 }) => {
     const { series, userData, watchlist, setSidebarOpen, cefrLevel, userName } = useAppStore();
     const onMenuClick = () => setSidebarOpen(true);
-    const [showFullRecs, setShowFullRecs] = React.useState(false);
+    const [showFullRecs, setShowFullRecs] = React.useState(true);
 
     // Calculate overall stats
     const stats = React.useMemo(() => {
@@ -133,39 +133,31 @@ const Dashboard = ({
                     </div>
                 </motion.header>
 
-                {/* Stats Bar - Only show if user has series */}
+                {/* Mini Stats - Inline */}
                 {series.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"
+                        className="flex items-center gap-6 mb-6 text-sm"
                     >
-                        <StatCard
-                            icon={<BookOpen size={18} />}
-                            label="Aktif Dizi"
-                            value={stats.totalSeries}
-                            color="indigo"
-                        />
-                        <StatCard
-                            icon={<Target size={18} />}
-                            label="Toplam Bölüm"
-                            value={stats.totalEpisodes}
-                            color="purple"
-                        />
-                        <StatCard
-                            icon={<CheckCircle size={18} />}
-                            label="İzlenen"
-                            value={stats.completedEpisodes}
-                            color="emerald"
-                        />
-                        <StatCard
-                            icon={<TrendingUp size={18} />}
-                            label="Genel İlerleme"
-                            value={`%${stats.overallProgress}`}
-                            color="pink"
-                            highlight
-                        />
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                            <span>{stats.totalSeries} dizi</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span>{stats.completedEpisodes}/{stats.totalEpisodes} bölüm</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                                    style={{ width: `${stats.overallProgress}%` }}
+                                />
+                            </div>
+                            <span className="text-white font-medium">%{stats.overallProgress}</span>
+                        </div>
                     </motion.div>
                 )}
 
@@ -212,47 +204,39 @@ const Dashboard = ({
                     />
                 )}
 
-                {/* Discover Section */}
+                {/* Discover Section - Always visible, toggleable */}
                 {series.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="mt-12"
+                        className="mt-10"
                     >
-                        {!showFullRecs ? (
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                <Sparkles className="text-indigo-400" size={18} />
+                                Öneriler
+                            </h2>
                             <button
-                                onClick={() => setShowFullRecs(true)}
-                                className="group w-full p-6 rounded-2xl bg-gradient-to-r from-indigo-500/5 to-purple-500/5 border border-white/5 hover:border-indigo-500/30 transition-all flex items-center justify-between"
+                                onClick={() => setShowFullRecs(!showFullRecs)}
+                                className="text-slate-500 hover:text-white text-xs font-medium transition-colors"
                             >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                                        <Sparkles size={20} className="text-indigo-400" />
-                                    </div>
-                                    <div className="text-left">
-                                        <h3 className="text-white font-semibold">Yeni Diziler Keşfet</h3>
-                                        <p className="text-slate-500 text-sm">Seviyene uygun öneriler</p>
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} className="text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+                                {showFullRecs ? 'Gizle' : 'Göster'}
                             </button>
-                        ) : (
-                            <div className="animate-fade-in">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <Sparkles className="text-indigo-400" size={20} />
-                                        Keşif Modu
-                                    </h2>
-                                    <button
-                                        onClick={() => setShowFullRecs(false)}
-                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest transition-all"
-                                    >
-                                        Kapat
-                                    </button>
-                                </div>
-                                <RecommendationsSection onStart={onStartWatching} onWatchlist={onAddToWatchlist} watchlist={watchlist} />
-                            </div>
-                        )}
+                        </div>
+
+                        <AnimatePresence>
+                            {showFullRecs && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <RecommendationsSection onStart={onStartWatching} onWatchlist={onAddToWatchlist} watchlist={watchlist} />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </motion.div>
                 )}
             </div>
@@ -268,33 +252,7 @@ const Dashboard = ({
     );
 };
 
-// Stat Card Component
-const StatCard = ({ icon, label, value, color, highlight }) => {
-    const colorClasses = {
-        indigo: 'from-indigo-500/20 to-indigo-500/5 border-indigo-500/20 text-indigo-400',
-        purple: 'from-purple-500/20 to-purple-500/5 border-purple-500/20 text-purple-400',
-        emerald: 'from-emerald-500/20 to-emerald-500/5 border-emerald-500/20 text-emerald-400',
-        pink: 'from-pink-500/20 to-pink-500/5 border-pink-500/20 text-pink-400',
-    };
 
-    return (
-        <div className={`p-4 rounded-2xl bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-sm ${highlight ? 'ring-1 ring-white/5' : ''}`}>
-            <div className="flex items-center gap-2 mb-2">
-                {icon}
-                <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">{label}</span>
-            </div>
-            <p className={`text-2xl font-bold ${highlight ? 'text-white' : 'text-white/90'}`}>{value}</p>
-        </div>
-    );
-};
-
-StatCard.propTypes = {
-    icon: PropTypes.node.isRequired,
-    label: PropTypes.string.isRequired,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    color: PropTypes.string.isRequired,
-    highlight: PropTypes.bool
-};
 
 // Series Card Component
 const SeriesCard = ({ series: s, userData, onSeriesClick, onDeleteSeries, index }) => {
@@ -418,32 +376,22 @@ const InitialSetupView = ({ onAddClick, cefrLevel, onStartWatching, onAddToWatch
             animate={{ opacity: 1 }}
             className="py-8"
         >
-            {/* Hero Section */}
-            <div className="max-w-2xl mx-auto text-center mb-12">
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6"
-                >
-                    <Sparkles size={14} />
-                    Dil öğrenme yolculuğuna başla
-                </motion.div>
-
-                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                    İlk dizini <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">seç</span>
+            {/* Hero Section - Minimal */}
+            <div className="max-w-xl mx-auto text-center mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                    Hadi <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">başlayalım</span>
                 </h2>
-                <p className="text-slate-400 text-lg mb-8">
-                    Seviyene uygun içeriklerle pratik yapmaya başla
+                <p className="text-slate-500 mb-6">
+                    İzlemek istediğin diziyi bul
                 </p>
 
                 {/* Search Button */}
                 <button
                     onClick={onAddClick}
-                    className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl text-slate-400 transition-all hover:border-indigo-500/50 hover:text-white hover:bg-white/[0.05]"
+                    className="group inline-flex items-center gap-3 px-6 py-3 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl text-slate-400 transition-all hover:border-indigo-500/50 hover:text-white hover:bg-white/[0.05]"
                 >
-                    <Search size={20} className="text-indigo-400" />
-                    <span className="font-medium">Dizi ara veya keşfet...</span>
-                    <ChevronRight size={18} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                    <Search size={18} className="text-indigo-400" />
+                    <span className="font-medium">Dizi ara...</span>
                 </button>
             </div>
 
