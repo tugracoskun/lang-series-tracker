@@ -15,10 +15,16 @@ const Sidebar = () => {
     const {
         isSidebarOpen, setSidebarOpen,
         sidebarCollapsed, setSidebarCollapsed,
-        user, userName, history, series, notes,
+        user, userName, history, series, notes, userData,
         setShowAuthModal,
         cefrLevel
     } = useAppStore();
+
+    // Toplam kelime sayısı hesapla
+    const totalVocabulary = Object.values(userData || {}).reduce((total, seriesData) => {
+        const vocabEntries = Object.values(seriesData?.vocabulary || {});
+        return total + vocabEntries.reduce((sum, words) => sum + (Array.isArray(words) ? words.length : 0), 0);
+    }, 0);
 
     const [isDesktop, setIsDesktop] = useState(false);
     const location = useLocation();
@@ -76,6 +82,7 @@ const Sidebar = () => {
         history,
         series,
         notes,
+        totalVocabulary,
         cefrLevel,
         activeView,
         onClose,
@@ -162,6 +169,7 @@ const SidebarContent = ({
     history,
     series,
     notes,
+    totalVocabulary,
     cefrLevel,
     activeView,
     onClose,
@@ -276,8 +284,8 @@ const SidebarContent = ({
                         </div>
                         <div className="w-px h-3 bg-white/10" />
                         <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-white">{notes?.length || 0}</span>
-                            <span>not</span>
+                            <span className="font-bold text-emerald-400">{totalVocabulary || 0}</span>
+                            <span>kelime</span>
                         </div>
                         <div className="w-px h-3 bg-white/10" />
                         <div className="flex items-center gap-1.5">
@@ -332,6 +340,7 @@ SidebarContent.propTypes = {
     })),
     series: PropTypes.arrayOf(PropTypes.object),
     notes: PropTypes.arrayOf(PropTypes.object),
+    totalVocabulary: PropTypes.number,
     cefrLevel: PropTypes.string,
     activeView: PropTypes.string,
     onClose: PropTypes.func,

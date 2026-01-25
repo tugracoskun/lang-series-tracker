@@ -7,9 +7,11 @@ import { SubtitleService, SUPPORTED_LANGUAGES } from '../../services/SubtitleSer
 import { getSubtitleDisplay } from '../../utils/schedule';
 import { toast } from 'sonner';
 import { TraktService } from '../../services/TraktService';
+import { useAppStore } from '../../store/useAppStore';
 
 
-const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpdateVocab, seriesId, seriesName, isTraktWatched }) => {
+const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpdateVocab, onAddNote, onDeleteNote, seriesId, seriesName, isTraktWatched }) => {
+    const { notes } = useAppStore();
     const slugify = (text) => text?.toString().toLowerCase()
         .replace(/\s+/g, '-')
         .replace(/[^\w\-]+/g, '')
@@ -125,11 +127,34 @@ const EpisodeModal = ({ isOpen, onClose, episode, context, data, onToggle, onUpd
         const newVocabItem = { id: Date.now(), word, meaning, date: new Date().toISOString() };
         const newVocab = [...vocabList, newVocabItem];
         onUpdateVocab(episode.id, newVocab);
+
+        // Ayrıca not olarak da ekle (Vocabulary etiketi ile)
+        if (onAddNote) {
+            const episodeCode = `S${episode.season}E${episode.number}`;
+            onAddNote({
+                title: `📚 ${word}`,
+                content: `**${word}** - ${meaning}\n\n📺 ${seriesName} ${episodeCode} - ${episode.name}`,
+                tag: 'Vocabulary',
+                seriesId: seriesId?.toString() || null
+            });
+        }
+
         setWord("");
         setMeaning("");
     };
 
     const removeVocab = (vocabId) => {
+        const itemToRemove = vocabList.find(v => v.id === vocabId);
+        if (itemToRemove && onDeleteNote) {
+            // Bu kelimeye ait notu bul (📚 ile başlayan aynı kelime)
+            const noteTitle = `📚 ${itemToRemove.word}`;
+            const linkedNote = notes.find(n => n.title === noteTitle && n.seriesId === seriesId?.toString());
+
+            if (linkedNote) {
+                onDeleteNote(linkedNote.id);
+            }
+        }
+
         const newVocab = vocabList.filter(v => v.id !== vocabId);
         onUpdateVocab(episode.id, newVocab);
     };
@@ -494,6 +519,7 @@ EpisodeModal.propTypes = {
     }).isRequired,
     onToggle: PropTypes.func.isRequired,
     onUpdateVocab: PropTypes.func.isRequired,
+    onAddNote: PropTypes.func,
     seriesId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     seriesName: PropTypes.string,
     isTraktWatched: PropTypes.bool

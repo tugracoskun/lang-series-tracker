@@ -22,11 +22,17 @@ export const useAppStore = create(
             watchlist: [],
             notes: [],
 
-            // Allow full DB replace (for sync)
-            setDb: (newDb) => set((state) => ({
-                ...state,
-                ...newDb
-            })),
+            // Allow full DB replace (for sync) - supports both object and function updater
+            setDb: (newDbOrUpdater) => set((state) => {
+                // If it's a function, call it with current state
+                const newDb = typeof newDbOrUpdater === 'function'
+                    ? newDbOrUpdater(state)
+                    : newDbOrUpdater;
+                return {
+                    ...state,
+                    ...newDb
+                };
+            }),
 
             // Granular updates
             updateSeries: (seriesList) => set({ series: seriesList }),

@@ -177,11 +177,20 @@ export const useSeriesManager = (user, db, setDb, appMutations, logAction, rotat
             if (newData.vocabulary) {
                 const epId = Object.keys(newData.vocabulary)[0];
                 const newList = newData.vocabulary[epId];
-                const oldList = db.userData[seriesId]?.vocabulary?.[epId] || [];
 
-                // Diffing
+                // Mevcut local state'i hemen güncelle
+                setDb(prev => {
+                    const newUserData = { ...prev.userData };
+                    if (!newUserData[seriesId]) newUserData[seriesId] = { completed: {}, vocabulary: {}, notes: {} };
+                    newUserData[seriesId].vocabulary = {
+                        ...newUserData[seriesId].vocabulary,
+                        [epId]: newList
+                    };
+                    return { ...prev, userData: newUserData };
+                });
+
+                const oldList = db.userData[seriesId]?.vocabulary?.[epId] || [];
                 const added = newList.filter(n => !oldList.some(o => o.word === n.word));
-                const removed = oldList.filter(o => !newList.some(n => n.word === o.word));
 
                 for (const item of added) {
                     try {
@@ -194,14 +203,6 @@ export const useSeriesManager = (user, db, setDb, appMutations, logAction, rotat
                         logAction('VOCAB', `${seriesName} için yeni kelime: ${item.word}`);
                     } catch (e) {
                         console.error('Vocab add error:', e);
-                    }
-                }
-
-                for (const item of removed) {
-                    try {
-                        if (item.id) await appMutations.deleteVocabulary.mutateAsync(item.id);
-                    } catch (e) {
-                        console.error('Vocab remove error:', e);
                     }
                 }
             }

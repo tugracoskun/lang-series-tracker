@@ -77,6 +77,9 @@ function App() {
     // Removed manual sidebar state
     const appMutations = useAppMutations(user?.id);
 
+    // Track if initial sync is done (for remote data)
+    const [initialSyncDone, setInitialSyncDone] = useState(false);
+
     // Supabase Auth Listener
     useEffect(() => {
         if (!isSupabaseConfigured()) {
@@ -101,9 +104,11 @@ function App() {
                 setUserName(session.user.user_metadata?.user_name || session.user.email?.split('@')[0] || '');
             } else {
                 setDb({ series: [], userData: {}, history: [], watchlist: [], notes: [] });
+                setInitialSyncDone(false); // Reset for next login
             }
             if (event === 'SIGNED_OUT') {
                 setUser(null);
+                setInitialSyncDone(false); // Reset for next login
             }
         });
 
@@ -113,9 +118,9 @@ function App() {
     // React Query Data Fetching
     const { data: remoteData, isLoading: isUserDataLoading, error: userDataError } = useUserData(user?.id);
 
-    // Sync remote data to local 'db' state
+    // Sync remote data to local 'db' state - ONLY on initial load
     useEffect(() => {
-        if (remoteData) {
+        if (remoteData && !initialSyncDone) {
             // Profil ayarlarını ve user name'i güncelle
             const { profile } = remoteData;
             if (profile) {
@@ -132,13 +137,26 @@ function App() {
                 }
             }
 
-            // DB state'ini güncelle
+            // DB state'ini güncelle - Sadece eksik verileri tamamla veya birleştir
             const dbData = { ...remoteData };
             delete dbData.profile;
-            // setDb from store automatically handles merging
-            setDb(dbData);
+
+            setDb(state => {
+                // Derin birleştirme yapalım
+                return {
+                    series: dbData.series || state.series,
+                    watchlist: dbData.watchlist || state.watchlist,
+                    notes: dbData.notes?.length > state.notes?.length ? dbData.notes : state.notes,
+                    history: dbData.history?.length > state.history?.length ? dbData.history : state.history,
+                    userData: {
+                        ...state.userData,
+                        ...dbData.userData // Remote veriyi ekle ama local'i tamamen silme
+                    }
+                };
+            });
+            setInitialSyncDone(true);
         }
-    }, [remoteData]);
+    }, [remoteData, initialSyncDone]);
 
     useEffect(() => {
         if (isUserDataLoading) setLoadingState("Verileriniz yükleniyor...");
@@ -311,6 +329,8 @@ function App() {
                                     data={userData}
                                     onUpdate={handleUpdate}
                                     onSeriesSettingsUpdate={handleSeriesSettingsUpdate}
+                                    onAddNote={handleAddNote}
+                                    onDeleteNote={handleDeleteNote}
                                 />
                             } />
 

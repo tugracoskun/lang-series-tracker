@@ -101,7 +101,7 @@ const NotesPage = ({ onAdd, onUpdate, onDelete }) => {
                                 onClick={() => setSelectedNotebook(s.id)}
                                 label={s.name}
                                 count={notes.filter(n => n.seriesId === s.id).length}
-                                image={s.image?.medium}
+                                image={s.image?.medium || s.image?.original}
                             />
                         ))}
                     </div>
@@ -172,33 +172,54 @@ const NotesPage = ({ onAdd, onUpdate, onDelete }) => {
 
                             {/* Notes Grid */}
                             <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 content-start pr-2 custom-scrollbar">
-                                {filteredNotes.map(note => (
-                                    <button
-                                        key={note.id}
-                                        onClick={() => setEditingNote(note)}
-                                        className="glass-panel border-white/5 rounded-[1.5rem] p-5 cursor-pointer hover:border-indigo-500/30 transition-all group text-left"
-                                    >
-                                        <div className="flex justify-between items-start mb-3">
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${getTagColor(note.tag)}`}>
-                                                {note.tag}
-                                            </span>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
-                                                className="text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                        <h3 className="text-white font-bold mb-2 line-clamp-1">{note.title}</h3>
-                                        <p className="text-slate-400 text-sm line-clamp-3 mb-4 font-light leading-relaxed">
-                                            {note.content}
-                                        </p>
-                                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono mt-auto">
-                                            <Clock size={12} />
-                                            {new Date(note.updatedAt).toLocaleDateString()}
-                                        </div>
-                                    </button>
-                                ))}
+                                {filteredNotes.map(note => {
+                                    const noteSeries = series.find(s => s.id === note.seriesId);
+                                    return (
+                                        <button
+                                            key={note.id}
+                                            onClick={() => setEditingNote(note)}
+                                            className="glass-panel border-white/5 rounded-[1.5rem] p-5 cursor-pointer hover:border-indigo-500/30 transition-all group text-left flex flex-col h-full"
+                                        >
+                                            <div className="flex justify-between items-start mb-3">
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${getTagColor(note.tag)}`}>
+                                                    {note.tag}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+                                                    className="text-slate-600 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+
+                                            <h3 className="text-white font-bold mb-2 line-clamp-1">{note.title}</h3>
+                                            <p className="text-slate-400 text-sm line-clamp-3 mb-4 font-light leading-relaxed flex-1">
+                                                {note.content}
+                                            </p>
+
+                                            <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                                                {noteSeries ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-5 h-7 rounded bg-white/10 overflow-hidden shrink-0">
+                                                            <img src={noteSeries.image?.original || noteSeries.image?.medium} className="w-full h-full object-cover" alt="" />
+                                                        </div>
+                                                        <span className="text-[10px] text-slate-400 truncate max-w-[80px]">{noteSeries.name}</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                                                        <Book size={10} />
+                                                        <span>Genel Not</span>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center gap-1 text-[9px] text-slate-600 font-mono">
+                                                    <Clock size={10} />
+                                                    {new Date(note.updatedAt).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                                 {filteredNotes.length === 0 && (
                                     <div className="col-span-full py-20 text-center text-slate-500 italic">
                                         Henüz not bulunmuyor.

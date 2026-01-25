@@ -130,13 +130,13 @@ export const useAppMutations = (userId) => {
             if (context?.previousData) {
                 queryClient.setQueryData(queryKey, context.previousData);
             }
-        },
-        onSettled: invalidate
+        }
+        // No invalidate - we handle local state, Supabase is just backup
     });
 
     const deleteVocabulary = useMutation({
-        mutationFn: (id) => VocabularyService.deleteVocabulary(id),
-        onSettled: invalidate
+        mutationFn: (id) => VocabularyService.deleteVocabulary(id)
+        // No invalidate needed - local state handles it
     });
 
     // --- PROFILE ---

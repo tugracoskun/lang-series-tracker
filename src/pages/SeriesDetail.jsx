@@ -192,7 +192,7 @@ WeekCard.propTypes = {
 
 // --- Main Component ---
 
-const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSettingsUpdate }) => {
+const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSettingsUpdate, onAddNote, onDeleteNote }) => {
     const { seriesId } = useParams();
     const navigate = useNavigate();
     const { setSidebarOpen } = useAppStore();
@@ -325,6 +325,8 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
                 data={data}
                 onToggle={toggleDay}
                 onUpdateVocab={updateVocab}
+                onAddNote={onAddNote}
+                onDeleteNote={onDeleteNote}
                 seriesId={series.id}
                 seriesName={series.name}
                 isTraktWatched={selectedEpisode ? traktWatched?.[selectedEpisode.context?.id] : false}
@@ -526,7 +528,9 @@ SeriesDetail.propTypes = {
     seriesList: PropTypes.array.isRequired,
     data: PropTypes.object.isRequired,
     onUpdate: PropTypes.func.isRequired,
-    onSeriesSettingsUpdate: PropTypes.func
+    onSeriesSettingsUpdate: PropTypes.func,
+    onAddNote: PropTypes.func,
+    onDeleteNote: PropTypes.func
 };
 
 export default SeriesDetail;
