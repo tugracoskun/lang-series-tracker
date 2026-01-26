@@ -7,7 +7,7 @@ import {
 import { TVMazeService } from '../../services/TVMazeService';
 import { RECOMMENDATIONS, CEFR_LEVELS } from '../../data/recommendations';
 
-const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
+const SeriesCard = ({ id, onStart, onWatchlist, watchlist, level }) => {
     const [show, setShow] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imgError, setImgError] = useState(false);
@@ -76,6 +76,18 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Level Badge (Only shows if level prop is provided) */}
+            {level && (
+                <div className="absolute top-2 left-2 z-20">
+                    <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md border ${['A1', 'A2'].includes(level) ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                            ['B1', 'B2'].includes(level) ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' :
+                                'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                        }`}>
+                        {level}
+                    </span>
+                </div>
+            )}
 
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                 <button
@@ -166,11 +178,11 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
                 >
                     {items.map(item => (
                         <SeriesCard
-                            key={item.id}
                             id={item.id}
                             onStart={onStart}
                             onWatchlist={onWatchlist}
                             watchlist={watchlist}
+                            level={item.level || (levelInfo ? level : null)}
                         />
                     ))}
                 </div>
@@ -186,31 +198,102 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
     );
 };
 
-const RecommendationsSection = ({ onStart, onWatchlist, watchlist }) => {
+const RecommendationsSection = ({ onStart, onWatchlist, watchlist, smartRecs }) => {
+    const [activeTab, setActiveTab] = useState(smartRecs?.hasPreferences ? 'foryou' : 'all');
+
+    // Eğer kullanıcının tercihi yoksa (yeni kullanıcı), otomatik "all" sekmesine geç
+    useEffect(() => {
+        if (!smartRecs?.hasPreferences) {
+            setActiveTab('all');
+        } else {
+            setActiveTab('foryou');
+        }
+    }, [smartRecs?.hasPreferences]);
+
     return (
         <div className="mt-16 border-t border-slate-800/50 pt-12">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="bg-indigo-500/10 p-2 rounded-lg">
-                    <GraduationCap className="text-indigo-400" size={24} />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                <div className="flex items-center gap-3">
+                    <div className="bg-indigo-500/10 p-2 rounded-lg">
+                        <GraduationCap className="text-indigo-400" size={24} />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-bold text-white">Dizi Önerileri</h2>
+                        <p className="text-slate-400">Dil seviyenize ve zevklerinize uygun içerikler.</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 className="text-3xl font-bold text-white">CEFR Seviyelerine Göre Diziler</h2>
-                    <p className="text-slate-400">A1'den C2'ye kadar dil seviyenize uygun içerikler. Toplam 60+ dizi.</p>
-                </div>
+
+                {/* Tabs */}
+                {smartRecs?.hasPreferences && (
+                    <div className="flex bg-slate-800/50 p-1 rounded-xl self-start md:self-auto">
+                        <button
+                            onClick={() => setActiveTab('foryou')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'foryou'
+                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
+                                : 'text-slate-400 hover:text-white'}`}
+                        >
+                            Sana Özel
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('all')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'all'
+                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
+                                : 'text-slate-400 hover:text-white'}`}
+                        >
+                            Tüm Liste
+                        </button>
+                    </div>
+                )}
             </div>
 
-            {RECOMMENDATIONS.map((cat, idx) => (
-                <RecommendationRow
-                    key={idx}
-                    title={cat.title}
-                    description={cat.description}
-                    items={cat.items}
-                    level={cat.level}
-                    onStart={onStart}
-                    onWatchlist={onWatchlist}
-                    watchlist={watchlist}
-                />
-            ))}
+            {/* Content */}
+            <div className="min-h-[400px]">
+                {activeTab === 'foryou' && smartRecs ? (
+                    <div className="space-y-2 animate-fade-in">
+                        {/* 1. En İyi Eşleşmeler */}
+                        {smartRecs.topPicks.length > 0 && (
+                            <RecommendationRow
+                                title="Sizin İçin Seçtiklerimiz"
+                                description="İzlediğiniz türlere ve seviyenize göre en iyi eşleşmeler."
+                                items={smartRecs.topPicks}
+                                level="TOP" // Özel stil için
+                                onStart={onStart}
+                                onWatchlist={onWatchlist}
+                                watchlist={watchlist}
+                            />
+                        )}
+
+                        {/* 2. Türe Göre Öneriler */}
+                        {Object.entries(smartRecs.byGenre).map(([genre, items]) => (
+                            <RecommendationRow
+                                key={genre}
+                                title={`${genre} Severler İçin`}
+                                description={`Favori türlerinizden biri olan ${genre} kategorisinde öneriler.`}
+                                items={items}
+                                level="GENRE"
+                                onStart={onStart}
+                                onWatchlist={onWatchlist}
+                                watchlist={watchlist}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="space-y-2 animate-fade-in">
+                        {RECOMMENDATIONS.map((cat, idx) => (
+                            <RecommendationRow
+                                key={idx}
+                                title={cat.title}
+                                description={cat.description}
+                                items={cat.items}
+                                level={cat.level}
+                                onStart={onStart}
+                                onWatchlist={onWatchlist}
+                                watchlist={watchlist}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -7,6 +7,7 @@ import { estimateDifficulty } from '../utils/seriesUtils';
 import { RECOMMENDATIONS, CEFR_LEVELS } from '../data/recommendations';
 import { useAppStore } from '../store/useAppStore';
 import { TVMazeService } from '../services/TVMazeService';
+import { getSmartRecommendations } from '../utils/recommendationUtils';
 
 const getDifficultyBadgeClass = (id) => {
     switch (id) {
@@ -75,6 +76,11 @@ const Dashboard = ({
             overallProgress: totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0
         };
     }, [series, userData]);
+
+    // Smart Recommendations Calculation
+    const smartRecs = React.useMemo(() => {
+        return getSmartRecommendations(series, cefrLevel);
+    }, [series, cefrLevel]);
 
     // Get greeting based on time
     const getGreeting = () => {
@@ -233,7 +239,12 @@ const Dashboard = ({
                                     exit={{ opacity: 0, height: 0 }}
                                     transition={{ duration: 0.3 }}
                                 >
-                                    <RecommendationsSection onStart={onStartWatching} onWatchlist={onAddToWatchlist} watchlist={watchlist} />
+                                    <RecommendationsSection
+                                        onStart={onStartWatching}
+                                        onWatchlist={onAddToWatchlist}
+                                        watchlist={watchlist}
+                                        smartRecs={smartRecs}
+                                    />
                                 </motion.div>
                             )}
                         </AnimatePresence>
