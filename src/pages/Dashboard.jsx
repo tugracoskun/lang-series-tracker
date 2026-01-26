@@ -212,43 +212,16 @@ const Dashboard = ({
 
                 {/* Discover Section - Controlled by settings */}
                 {series.length > 0 && showRecommendations && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-10"
-                    >
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                                <Sparkles className="text-indigo-400" size={18} />
-                                Öneriler
-                            </h2>
-                            <button
-                                onClick={() => setShowFullRecs(!showFullRecs)}
-                                className="text-slate-500 hover:text-white text-xs font-medium transition-colors"
-                            >
-                                {showFullRecs ? 'Gizle' : 'Göster'}
-                            </button>
-                        </div>
-
-                        <AnimatePresence>
-                            {showFullRecs && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <RecommendationsSection
-                                        onStart={onStartWatching}
-                                        onWatchlist={onAddToWatchlist}
-                                        watchlist={watchlist}
-                                        smartRecs={smartRecs}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
+                    <div className="mt-6">
+                        <RecommendationsSection
+                            onStart={onStartWatching}
+                            onWatchlist={onAddToWatchlist}
+                            watchlist={watchlist}
+                            smartRecs={smartRecs}
+                            isExpanded={showFullRecs}
+                            onToggle={() => setShowFullRecs(!showFullRecs)}
+                        />
+                    </div>
                 )}
             </div>
 

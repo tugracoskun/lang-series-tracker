@@ -223,7 +223,7 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
     );
 };
 
-const RecommendationsSection = ({ onStart, onWatchlist, watchlist, smartRecs }) => {
+const RecommendationsSection = ({ onStart, onWatchlist, watchlist, smartRecs, isExpanded = true, onToggle }) => {
     const [activeTab, setActiveTab] = useState(smartRecs?.hasPreferences ? 'foryou' : 'all');
 
     // Eğer kullanıcının tercihi yoksa (yeni kullanıcı), otomatik "all" sekmesine geç
@@ -236,89 +236,105 @@ const RecommendationsSection = ({ onStart, onWatchlist, watchlist, smartRecs }) 
     }, [smartRecs?.hasPreferences]);
 
     return (
-        <div className="mt-16 border-t border-slate-800/50 pt-12">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div className="pt-2"> {/* Eski margin ve borderlar kaldırıldı */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="bg-indigo-500/10 p-2 rounded-lg">
                         <GraduationCap className="text-indigo-400" size={24} />
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold text-white">Dizi Önerileri</h2>
-                        <p className="text-slate-400">Dil seviyenize ve zevklerinize uygun içerikler.</p>
+                        <h2 className="text-2xl font-bold text-white">Dizi Önerileri</h2>
+                        <p className="text-slate-400 text-sm">Dil seviyenize ve zevklerinize uygun içerikler.</p>
                     </div>
                 </div>
 
-                {/* Tabs */}
-                {smartRecs?.hasPreferences && (
-                    <div className="flex bg-slate-800/50 p-1 rounded-xl self-start md:self-auto">
-                        <button
-                            onClick={() => setActiveTab('foryou')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'foryou'
-                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                                : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Sana Özel
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('all')}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'all'
-                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
-                                : 'text-slate-400 hover:text-white'}`}
-                        >
-                            Tüm Liste
-                        </button>
-                    </div>
-                )}
+                {/* Controls & Tabs Container */}
+                <div className="flex bg-slate-800/50 p-1 rounded-xl self-start md:self-auto">
+                    {/* Toggle Button */}
+                    <button
+                        onClick={onToggle}
+                        className="px-4 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition-all hover:bg-white/5"
+                    >
+                        {isExpanded ? 'Gizle' : 'Göster'}
+                    </button>
+
+                    {/* Separator (only if tabs exist) */}
+                    {smartRecs?.hasPreferences && <div className="w-px bg-white/10 my-1 mx-1" />}
+
+                    {/* Tabs */}
+                    {smartRecs?.hasPreferences && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('foryou')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'foryou'
+                                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
+                                    : 'text-slate-400 hover:text-white'}`}
+                            >
+                                Sana Özel
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('all')}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'all'
+                                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
+                                    : 'text-slate-400 hover:text-white'}`}
+                            >
+                                Tüm Liste
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Content */}
-            <div className="min-h-[400px]">
-                {activeTab === 'foryou' && smartRecs ? (
-                    <div className="space-y-2 animate-fade-in">
-                        {/* 1. En İyi Eşleşmeler */}
-                        {smartRecs.topPicks.length > 0 && (
-                            <RecommendationRow
-                                title="Sizin İçin Seçtiklerimiz"
-                                description="İzlediğiniz türlere ve seviyenize göre en iyi eşleşmeler."
-                                items={smartRecs.topPicks}
-                                level="TOP" // Özel stil için
-                                onStart={onStart}
-                                onWatchlist={onWatchlist}
-                                watchlist={watchlist}
-                            />
-                        )}
+            {isExpanded && (
+                <div className="min-h-[400px] animate-fade-in">
+                    {activeTab === 'foryou' && smartRecs ? (
+                        <div className="space-y-2">
+                            {/* 1. En İyi Eşleşmeler */}
+                            {smartRecs.topPicks.length > 0 && (
+                                <RecommendationRow
+                                    title="Sizin İçin Seçtiklerimiz"
+                                    description="İzlediğiniz türlere ve seviyenize göre en iyi eşleşmeler."
+                                    items={smartRecs.topPicks}
+                                    level="TOP" // Özel stil için
+                                    onStart={onStart}
+                                    onWatchlist={onWatchlist}
+                                    watchlist={watchlist}
+                                />
+                            )}
 
-                        {/* 2. Türe Göre Öneriler */}
-                        {Object.entries(smartRecs.byGenre).map(([genre, items]) => (
-                            <RecommendationRow
-                                key={genre}
-                                title={`${genre} Severler İçin`}
-                                description={`Favori türlerinizden biri olan ${genre} kategorisinde öneriler.`}
-                                items={items}
-                                level="GENRE"
-                                onStart={onStart}
-                                onWatchlist={onWatchlist}
-                                watchlist={watchlist}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="space-y-2 animate-fade-in">
-                        {RECOMMENDATIONS.map((cat, idx) => (
-                            <RecommendationRow
-                                key={idx}
-                                title={cat.title}
-                                description={cat.description}
-                                items={cat.items}
-                                level={cat.level}
-                                onStart={onStart}
-                                onWatchlist={onWatchlist}
-                                watchlist={watchlist}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
+                            {/* 2. Türe Göre Öneriler */}
+                            {Object.entries(smartRecs.byGenre).map(([genre, items]) => (
+                                <RecommendationRow
+                                    key={genre}
+                                    title={`${genre} Severler İçin`}
+                                    description={`Favori türlerinizden biri olan ${genre} kategorisinde öneriler.`}
+                                    items={items}
+                                    level="GENRE"
+                                    onStart={onStart}
+                                    onWatchlist={onWatchlist}
+                                    watchlist={watchlist}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {RECOMMENDATIONS.map((cat, idx) => (
+                                <RecommendationRow
+                                    key={idx}
+                                    title={cat.title}
+                                    description={cat.description}
+                                    items={cat.items}
+                                    level={cat.level}
+                                    onStart={onStart}
+                                    onWatchlist={onWatchlist}
+                                    watchlist={watchlist}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
