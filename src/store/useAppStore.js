@@ -60,6 +60,8 @@ export const useAppStore = create(
             setRotationStrategy: (strategy) => set({ rotationStrategy: strategy }),
             cefrLevel: 'B1',
             setCefrLevel: (level) => set({ cefrLevel: level }),
+            showRecommendations: true,
+            setShowRecommendations: (show) => set({ showRecommendations: show }),
         }),
         {
             name: 'langTracker_v4_storage', // Shared storage key
@@ -74,6 +76,7 @@ export const useAppStore = create(
                 userName: state.userName,
                 rotationStrategy: state.rotationStrategy,
                 cefrLevel: state.cefrLevel,
+                showRecommendations: state.showRecommendations, // Eklendi
                 sidebarCollapsed: state.sidebarCollapsed
             }),
         }

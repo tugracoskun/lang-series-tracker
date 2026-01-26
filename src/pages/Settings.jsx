@@ -17,7 +17,8 @@ const SettingsPage = () => {
     const {
         user, userName,
         rotationStrategy, setRotationStrategy,
-        series, notes, userData, watchlist, cefrLevel
+        series, notes, userData, watchlist, cefrLevel,
+        showRecommendations, setShowRecommendations
     } = useAppStore();
     const [activeSection, setActiveSection] = useState('profile');
     const [langConfig, setLangConfig] = useState(getLanguageConfig());
@@ -521,6 +522,26 @@ const SettingsPage = () => {
                             <p className="text-amber-400 text-sm">
                                 🚧 Açık tema yakında eklenecek! Şu an sadece karanlık tema destekleniyor.
                             </p>
+                        </div>
+
+                        {/* Recommendations Setting */}
+                        <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-white font-medium">Önerilenler Paneli</h3>
+                                    <p className="text-xs text-slate-500">Ana sayfada dizi önerilerini göster</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowRecommendations(!showRecommendations)}
+                                    className={`relative w-12 h-6 rounded-full transition-colors ${showRecommendations ? 'bg-indigo-500' : 'bg-slate-700'
+                                        }`}
+                                >
+                                    <span
+                                        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${showRecommendations ? 'left-7' : 'left-1'
+                                            }`}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );

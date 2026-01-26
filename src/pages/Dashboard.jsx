@@ -46,7 +46,7 @@ const Dashboard = ({
     onStartWatching,
     onAddToWatchlist
 }) => {
-    const { series, userData, watchlist, setSidebarOpen, cefrLevel, userName } = useAppStore();
+    const { series, userData, watchlist, setSidebarOpen, cefrLevel, userName, showRecommendations } = useAppStore();
     const onMenuClick = () => setSidebarOpen(true);
     const [showFullRecs, setShowFullRecs] = React.useState(true);
 
@@ -204,8 +204,8 @@ const Dashboard = ({
                     />
                 )}
 
-                {/* Discover Section - Always visible, toggleable */}
-                {series.length > 0 && (
+                {/* Discover Section - Controlled by settings */}
+                {series.length > 0 && showRecommendations && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
