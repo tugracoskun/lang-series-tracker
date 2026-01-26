@@ -15,6 +15,83 @@ const getDifficultyBadgeClass = (id) => {
     }
 };
 
+// Async card for recommendations (fetches data by ID)
+const RecommendationCard = ({ series, onSelect }) => {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+        const fetchShow = async () => {
+            try {
+                // series.id is from our local DB, fetch full details from TVMaze
+                // series.title var ama series.name yok, TVMaze name bekliyor
+                const showData = await TVMazeService.getShowDetails(series.id);
+                if (mounted && showData) {
+                    setData({ ...showData, ...series });
+                }
+            } catch (e) {
+                console.error("Failed to load recommendation", series.id);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        fetchShow();
+        return () => { mounted = false; };
+    }, [series.id]);
+
+    // Use fetched data OR fallback to static series data
+    const displayData = data || {
+        ...series,
+        name: series.title || series.name, // static fallback
+        image: null
+    };
+
+    // Estimate difficulty creates valid object even with partial data?
+    // We need to ensure estimateDifficulty handles our fallback object
+    const difficulty = data ? estimateDifficulty(data) : {
+        id: 'MEDIUM', text: 'Orta', level: series.level || 'B1'
+    };
+
+    const imageUrl = displayData.image?.medium || displayData.image?.original;
+
+    return (
+        <button onClick={() => onSelect(displayData)}
+            className="group relative aspect-[2/3] bg-white/[0.03] rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-indigo-500/50 transition-all hover:scale-[1.02] text-left shadow-xl animate-fade-in-up">
+
+            {loading && !imageUrl && (
+                <div className="absolute inset-0 bg-white/5 animate-pulse z-0" />
+            )}
+
+            {imageUrl ? (
+                <img src={imageUrl} alt={displayData.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 scale-105 group-hover:scale-100" />
+            ) : (
+                <div className="flex h-full items-center justify-center text-slate-600 bg-slate-900/50">
+                    <span className="text-xs px-2 text-center">{!loading ? 'Poster Yok' : ''}</span>
+                </div>
+            )}
+
+            <div className="absolute top-3 right-3 z-10">
+                <span className={`liquid-badge ${getDifficultyBadgeClass(difficulty.id)}`}>
+                    {difficulty.text}
+                </span>
+            </div>
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#05070a] via-[#05070a]/20 to-transparent flex items-end p-5">
+                <div className="w-full">
+                    <h3 className="font-bold text-white text-base leading-tight mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">
+                        {displayData.name}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-slate-400 font-bold tracking-wider">{difficulty.level}</span>
+                        {series.level && <span className="text-[10px] text-indigo-400 font-black border border-indigo-500/30 bg-indigo-500/10 px-1.5 rounded">{series.level}</span>}
+                    </div>
+                </div>
+            </div>
+        </button>
+    );
+};
+
 const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
@@ -43,12 +120,11 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => 
     }, [isOpen]);
 
     // Hangi listeyi göstereceğiz? Arama sonucu mu, öneriler mi?
-    const displayList = (query.length > 2 && results.length > 0) ? results : (query.length === 0 ? recommendations : []);
     const isRecommendationView = query.length === 0 && recommendations.length > 0;
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-50" onClose={onClose}>
+            <Dialog as="div" className="relative z-[60]" onClose={onClose}>
                 <TransitionChild
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -104,13 +180,10 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => 
                                 <div className="flex-1 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 content-start pr-2 custom-scrollbar">
                                     {searching && <div className="col-span-full text-center text-slate-500">Taranıyor...</div>}
 
-                                    {!searching && displayList.map(show => {
-                                        // Eğer öneri listesinden geliyorsa (data yapısı farklı olabilir), TVMaze formatına uydur veya zaten uyumlu olduğunu varsay
-                                        // Not: recommendationUtils'deki veriler zaten yeterli alanlara sahip.
-
+                                    {/* Arama Sonuçları */}
+                                    {!searching && !isRecommendationView && results.map(show => {
                                         const difficulty = estimateDifficulty(show);
-                                        // show.image bir string URL de olabilir (recommendations.js), object de olabilir (TVMaze result)
-                                        const imageUrl = typeof show.image === 'string' ? show.image : (show.image?.medium || show.image?.original);
+                                        const imageUrl = show.image?.medium || show.image?.original;
 
                                         return (
                                             <button key={show.id} onClick={() => onSelect(show)}
@@ -130,8 +203,7 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => 
                                                         <h3 className="font-bold text-white text-base leading-tight mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">{show.name}</h3>
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-[11px] text-slate-400 font-bold tracking-wider">{difficulty.level}</span>
-                                                            {/* Level gösterme (eğer recommendation'sa show.level vardır) */}
-                                                            {show.level && <span className="text-[10px] text-indigo-400 font-black border border-indigo-500/30 bg-indigo-500/10 px-1.5 rounded">{show.level}</span>}
+                                                            <span className="text-[10px] text-indigo-500/50 font-mono">#{show.id}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -139,7 +211,16 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => 
                                         );
                                     })}
 
-                                    {!searching && displayList.length === 0 && query.length > 2 && (
+                                    {/* Öneriler (Async Cards) */}
+                                    {isRecommendationView && recommendations.map(rec => (
+                                        <RecommendationCard
+                                            key={rec.id}
+                                            series={rec}
+                                            onSelect={onSelect}
+                                        />
+                                    ))}
+
+                                    {!searching && !isRecommendationView && results.length === 0 && query.length > 2 && (
                                         <div className="col-span-full text-center text-slate-500 py-10">Sonuç bulunamadı.</div>
                                     )}
                                 </div>

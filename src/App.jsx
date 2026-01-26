@@ -62,10 +62,12 @@ function App() {
         // Settings State
         rotationStrategy, setRotationStrategy,
         setCefrLevel,
-        cefrLevel // Bunu ekledim çünkü hesaplama için lazım
+        cefrLevel,
+
+        // Global Modals
+        isAddModalOpen, setAddModalOpen
     } = useAppStore();
 
-    const [showAddModal, setShowAddModal] = useState(false);
     // Initial Load Check (Onboarding)
     const [showOnboarding, setShowOnboarding] = useState(() => {
         return !localStorage.getItem('langTracker_onboardingCompleted');
@@ -223,7 +225,7 @@ function App() {
     };
 
     const onModalSelect = (show) => {
-        setShowAddModal(false);
+        setAddModalOpen(false);
         if (location.pathname === '/watchlist') handleAddToWatchlist(show);
         else {
             handleSeriesSelect(show);
@@ -285,8 +287,8 @@ function App() {
 
             {/* Modals */}
             <AddSeriesModal
-                isOpen={showAddModal}
-                onClose={() => setShowAddModal(false)}
+                isOpen={isAddModalOpen}
+                onClose={() => setAddModalOpen(false)}
                 onSelect={onModalSelect}
                 recommendations={smartRecs?.topPicks || []}
             />
@@ -330,7 +332,7 @@ function App() {
                             <Route path="/" element={
                                 <Dashboard
                                     onSeriesClick={(id) => navigate(`/series/${id}`)}
-                                    onAddClick={() => setShowAddModal(true)}
+                                    onAddClick={() => setAddModalOpen(true)}
                                     // onDeleteSeries needs id param now if not passed directly. Dashboard passes (e, id) -> onDeleteSeries(e, id)
                                     onDeleteSeries={handleDelete}
                                     onStartWatching={handleStartWatching}
@@ -375,7 +377,7 @@ function App() {
                                 <WatchlistPage
                                     onStartWatching={handleStartWatching}
                                     onRemove={removeFromWatchlist}
-                                    onAddClick={() => setShowAddModal(true)}
+                                    onAddClick={() => setAddModalOpen(true)}
                                 />
                             } />
 
@@ -394,7 +396,6 @@ function App() {
                             <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
 
-                        <AddSeriesModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSelect={onModalSelect} />
                     </MainLayout>
                 </>
             )}

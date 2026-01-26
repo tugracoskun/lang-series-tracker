@@ -62,6 +62,10 @@ export const useAppStore = create(
             setCefrLevel: (level) => set({ cefrLevel: level }),
             showRecommendations: true,
             setShowRecommendations: (show) => set({ showRecommendations: show }),
+
+            // --- GLOBAL MODALS ---
+            isAddModalOpen: false,
+            setAddModalOpen: (isOpen) => set({ isAddModalOpen: isOpen }),
         }),
         {
             name: 'langTracker_v4_storage', // Shared storage key
