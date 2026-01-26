@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
 import { TVMazeService } from '../../services/TVMazeService';
 import { estimateDifficulty } from '../../utils/seriesUtils';
+import { Sparkles } from 'lucide-react';
 
 const getDifficultyBadgeClass = (id) => {
     switch (id) {
@@ -14,7 +15,7 @@ const getDifficultyBadgeClass = (id) => {
     }
 };
 
-const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
+const AddSeriesModal = ({ isOpen, onClose, onSelect, recommendations = [] }) => {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState([]);
     const [searching, setSearching] = useState(false);
@@ -40,6 +41,10 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
             setResults([]);
         }
     }, [isOpen]);
+
+    // Hangi listeyi göstereceğiz? Arama sonucu mu, öneriler mi?
+    const displayList = (query.length > 2 && results.length > 0) ? results : (query.length === 0 ? recommendations : []);
+    const isRecommendationView = query.length === 0 && recommendations.length > 0;
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
@@ -81,22 +86,37 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
 
                                 <input
                                     type="text"
-                                    className="w-full glass-input rounded-2xl px-6 py-5 text-white text-xl focus:outline-none mb-10 placeholder:text-slate-600 shadow-2xl"
+                                    className="w-full glass-input rounded-2xl px-6 py-5 text-white text-xl focus:outline-none mb-6 placeholder:text-slate-600 shadow-2xl"
                                     placeholder="Dizi adı girin (örn. Breaking Bad)..."
                                     value={query}
                                     onChange={e => setQuery(e.target.value)}
                                     autoFocus
                                 />
 
+                                {/* Recommendation Header */}
+                                {isRecommendationView && (
+                                    <div className="flex items-center gap-2 mb-4 animate-fade-in">
+                                        <Sparkles className="text-indigo-400" size={18} />
+                                        <h3 className="text-slate-400 text-sm font-medium">Sizin İçin Seçtiklerimiz</h3>
+                                    </div>
+                                )}
+
                                 <div className="flex-1 overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 content-start pr-2 custom-scrollbar">
                                     {searching && <div className="col-span-full text-center text-slate-500">Taranıyor...</div>}
-                                    {results.map(show => {
+
+                                    {!searching && displayList.map(show => {
+                                        // Eğer öneri listesinden geliyorsa (data yapısı farklı olabilir), TVMaze formatına uydur veya zaten uyumlu olduğunu varsay
+                                        // Not: recommendationUtils'deki veriler zaten yeterli alanlara sahip.
+
                                         const difficulty = estimateDifficulty(show);
+                                        // show.image bir string URL de olabilir (recommendations.js), object de olabilir (TVMaze result)
+                                        const imageUrl = typeof show.image === 'string' ? show.image : (show.image?.medium || show.image?.original);
+
                                         return (
                                             <button key={show.id} onClick={() => onSelect(show)}
-                                                className="group relative aspect-[2/3] bg-white/[0.03] rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-indigo-500/50 transition-all hover:scale-[1.02] text-left shadow-xl">
-                                                {show.image?.medium ? (
-                                                    <img src={show.image.medium} alt={show.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 scale-105 group-hover:scale-100" />
+                                                className="group relative aspect-[2/3] bg-white/[0.03] rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-indigo-500/50 transition-all hover:scale-[1.02] text-left shadow-xl animate-fade-in-up">
+                                                {imageUrl ? (
+                                                    <img src={imageUrl} alt={show.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 scale-105 group-hover:scale-100" />
                                                 ) : (
                                                     <div className="flex h-full items-center justify-center text-slate-600">Poster Yok</div>
                                                 )}
@@ -110,13 +130,18 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
                                                         <h3 className="font-bold text-white text-base leading-tight mb-2 group-hover:text-indigo-400 transition-colors line-clamp-2">{show.name}</h3>
                                                         <div className="flex items-center justify-between">
                                                             <span className="text-[11px] text-slate-400 font-bold tracking-wider">{difficulty.level}</span>
-                                                            <span className="text-[10px] text-indigo-500/50 font-mono">#{show.id}</span>
+                                                            {/* Level gösterme (eğer recommendation'sa show.level vardır) */}
+                                                            {show.level && <span className="text-[10px] text-indigo-400 font-black border border-indigo-500/30 bg-indigo-500/10 px-1.5 rounded">{show.level}</span>}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </button>
                                         );
                                     })}
+
+                                    {!searching && displayList.length === 0 && query.length > 2 && (
+                                        <div className="col-span-full text-center text-slate-500 py-10">Sonuç bulunamadı.</div>
+                                    )}
                                 </div>
                             </DialogPanel>
                         </TransitionChild>
@@ -130,7 +155,8 @@ const AddSeriesModal = ({ isOpen, onClose, onSelect }) => {
 AddSeriesModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    onSelect: PropTypes.func.isRequired
+    onSelect: PropTypes.func.isRequired,
+    recommendations: PropTypes.array
 };
 
 export default AddSeriesModal;

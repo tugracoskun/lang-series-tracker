@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     ChevronLeft, ChevronRight, Clock, Loader, CalendarPlus,
-    ImageOff, Check, GraduationCap,
+    ImageOff, Check, GraduationCap, Sparkles,
     Sprout, Leaf, TreeDeciduous, TreePine, Mountain, MountainSnow
 } from 'lucide-react';
 import { TVMazeService } from '../../services/TVMazeService';
@@ -77,15 +77,15 @@ const SeriesCard = ({ id, onStart, onWatchlist, watchlist, level }) => {
                 </div>
             </div>
 
-            {/* Level Badge (Only shows if level prop is provided) */}
+            {/* Level Badge (Modern Compact Design) */}
             {level && (
                 <div className="absolute top-2 left-2 z-20">
-                    <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-wider shadow-lg backdrop-blur-md border ${['A1', 'A2'].includes(level) ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
-                            ['B1', 'B2'].includes(level) ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' :
-                                'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                    <div className={`px-2 py-0.5 rounded-md text-[10px] font-bold shadow-lg backdrop-blur-md border tracking-wide flex items-center justify-center min-w-[28px] ${['A1', 'A2'].includes(level) ? 'bg-emerald-500/80 text-white border-emerald-400/50 shadow-emerald-500/20' :
+                        ['B1', 'B2'].includes(level) ? 'bg-indigo-500/80 text-white border-indigo-400/50 shadow-indigo-500/20' :
+                            'bg-rose-500/80 text-white border-rose-400/50 shadow-rose-500/20'
                         }`}>
                         {level}
-                    </span>
+                    </div>
                 </div>
             )}
 
@@ -148,36 +148,59 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
     };
 
     return (
-        <div className="mb-12 animate-fade-in-up">
-            <div className="flex items-center gap-4 mb-4 px-2">
-                {/* CEFR Seviye Badge */}
-                {levelInfo && (
-                    <span className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-black border backdrop-blur-xl shadow-2xl transition-all duration-500 scale-100 hover:scale-105 ${levelInfo.color === 'emerald' ? 'liquid-badge-emerald' : levelInfo.color === 'amber' ? 'liquid-badge-amber' : levelInfo.color === 'rose' ? 'liquid-badge-rose' : 'liquid-badge-indigo'}`}>
-                        {LevelIcon && <LevelIcon size={18} />}
-                        {level}
-                    </span>
+        <div className="mb-14 animate-fade-in-up"> {/* Margin artırıldı (8 -> 14) */}
+            {/* Header */}
+            <div className="flex items-start md:items-center gap-3 mb-5 px-2">
+                {levelInfo ? (
+                    <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border shadow-lg ${levelInfo.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                        levelInfo.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                            levelInfo.color === 'rose' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
+                                'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                        }`}>
+                        {LevelIcon && <LevelIcon size={20} className="drop-shadow-sm" />}
+                    </div>
+                ) : (
+                    <div className="shrink-0 w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg">
+                        <Sparkles size={20} />
+                    </div>
                 )}
-                <div>
-                    <h3 className="text-xl font-display font-bold text-slate-200">{title}</h3>
-                    <span className="text-sm text-slate-500 hidden md:inline-block">{description}</span>
+
+                <div className="flex flex-col">
+                    <h3 className="text-lg font-bold text-white leading-tight flex items-center gap-2">
+                        {title}
+                        {levelInfo && (
+                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider ${levelInfo.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                                levelInfo.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
+                                    levelInfo.color === 'rose' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
+                                        'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                                }`}>
+                                {level}
+                            </span>
+                        )}
+                    </h3>
+                    <span className="text-xs text-slate-400 font-medium line-clamp-1">{description}</span>
                 </div>
             </div>
 
+            {/* Slider Container */}
             <div className="relative group/row">
+                {/* Left Button & Shadow */}
                 <button
                     onClick={() => scroll(-300)}
-                    className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-black/80 to-transparent z-20 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity hover:bg-black/60"
+                    className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/90 to-transparent z-20 flex items-center justify-start pl-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+                    aria-label="Sola kaydır"
                 >
-                    <ChevronLeft className="text-white" size={32} />
+                    <ChevronLeft className="text-white drop-shadow-lg" size={40} />
                 </button>
 
+                {/* Scroll Area */}
                 <div
                     ref={scrollRef}
-                    className="flex overflow-x-auto pb-4 scrollbar-hide py-4 -my-4 px-2"
-                    style={{ scrollBehavior: 'smooth' }}
+                    className="flex overflow-x-auto pb-4 pt-2 scrollbar-hide -mx-2 px-2 scroll-smooth"
                 >
                     {items.map(item => (
                         <SeriesCard
+                            key={item.id}
                             id={item.id}
                             onStart={onStart}
                             onWatchlist={onWatchlist}
@@ -187,11 +210,13 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
                     ))}
                 </div>
 
+                {/* Right Button & Shadow */}
                 <button
                     onClick={() => scroll(300)}
-                    className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-black/80 to-transparent z-20 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity hover:bg-black/60"
+                    className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/90 to-transparent z-20 flex items-center justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+                    aria-label="Sağa kaydır"
                 >
-                    <ChevronRight className="text-white" size={32} />
+                    <ChevronRight className="text-white drop-shadow-lg" size={40} />
                 </button>
             </div>
         </div>

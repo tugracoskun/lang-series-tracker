@@ -33,6 +33,7 @@ import {
 import { useSeriesManager } from './hooks/useSeriesManager';
 import { useNoteManager } from './hooks/useNoteManager';
 import { useWatchlistManager } from './hooks/useWatchlistManager';
+import { getSmartRecommendations } from './utils/recommendationUtils';
 
 const STORAGE_KEY = 'langTracker_v4_seasons';
 
@@ -60,7 +61,8 @@ function App() {
 
         // Settings State
         rotationStrategy, setRotationStrategy,
-        setCefrLevel
+        setCefrLevel,
+        cefrLevel // Bunu ekledim çünkü hesaplama için lazım
     } = useAppStore();
 
     const [showAddModal, setShowAddModal] = useState(false);
@@ -229,6 +231,11 @@ function App() {
         }
     };
 
+    // Calculate smart recommendations for Add Series Modal
+    const smartRecs = React.useMemo(() => {
+        return getSmartRecommendations(series, cefrLevel || 'B1');
+    }, [series, cefrLevel]);
+
 
 
     const handleOnboardingComplete = async (formData) => {
@@ -274,6 +281,14 @@ function App() {
             <OnboardingModal
                 isOpen={showOnboarding}
                 onComplete={handleOnboardingComplete}
+            />
+
+            {/* Modals */}
+            <AddSeriesModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSelect={onModalSelect}
+                recommendations={smartRecs?.topPicks || []}
             />
 
             {/* Auth Modal */}
