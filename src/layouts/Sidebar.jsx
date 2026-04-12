@@ -268,8 +268,8 @@ const SidebarContent = ({
                             <div className="text-sm text-white font-medium truncate">
                                 {userName || (user?.email?.split('@')[0]) || 'Misafir'}
                             </div>
-                            <div className="text-[10px] text-slate-500 truncate">
-                                {user ? 'Profili görüntüle' : 'Giriş yap'}
+                            <div className="text-[10px] text-indigo-400 truncate font-medium">
+                                Tasarım Modu
                             </div>
                         </div>
                     )}
@@ -292,27 +292,6 @@ const SidebarContent = ({
                             <GraduationCap size={10} className="text-indigo-400" />
                             <span className="font-bold text-indigo-400">{cefrLevel || 'B1'}</span>
                         </div>
-                    </div>
-                )}
-
-                {/* Auth Button - Separate */}
-                {!compact && (
-                    <div className="mt-2">
-                        {user ? (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onSignOut(); }}
-                                className="w-full text-center py-2 text-xs text-slate-500 hover:text-rose-400 hover:bg-rose-500/5 rounded-lg transition-colors"
-                            >
-                                Çıkış Yap
-                            </button>
-                        ) : (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onShowAuth(); }}
-                                className="w-full text-center py-2 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 rounded-lg transition-colors"
-                            >
-                                Giriş Yap
-                            </button>
-                        )}
                     </div>
                 )}
             </div>

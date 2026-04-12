@@ -111,7 +111,7 @@ const Dashboard = ({
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
 
-                {/* Compact Header */}
+                {/* Colorful Header */}
                 <motion.header
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -128,7 +128,7 @@ const Dashboard = ({
                             </h1>
                         </div>
 
-                        {/* Quick Add Button - Desktop */}
+                        {/* Quick Add Button */}
                         <button
                             onClick={onAddClick}
                             className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/25"
@@ -139,13 +139,13 @@ const Dashboard = ({
                     </div>
                 </motion.header>
 
-                {/* Mini Stats - Inline */}
+                {/* Inline Stats */}
                 {series.length > 0 && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="flex items-center gap-6 mb-6 text-sm"
+                        className="flex items-center gap-6 mb-8 text-sm border-b border-white/5 pb-6"
                     >
                         <div className="flex items-center gap-2 text-slate-400">
                             <div className="w-2 h-2 rounded-full bg-indigo-500" />
@@ -153,16 +153,13 @@ const Dashboard = ({
                         </div>
                         <div className="flex items-center gap-2 text-slate-400">
                             <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>{stats.completedEpisodes}/{stats.totalEpisodes} bölüm</span>
+                            <span>%{stats.overallProgress} tamamlandı</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                                    style={{ width: `${stats.overallProgress}%` }}
-                                />
-                            </div>
-                            <span className="text-white font-medium">%{stats.overallProgress}</span>
+                        <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                                style={{ width: `${stats.overallProgress}%` }}
+                            />
                         </div>
                     </motion.div>
                 )}
@@ -337,10 +334,9 @@ const InitialSetupView = ({ onAddClick, cefrLevel, onStartWatching, onAddToWatch
     if (showFullRecs) {
         return (
             <div className="animate-fade-in">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                        <Sparkles className="text-indigo-400" size={20} />
-                        Tüm Öneriler
+                <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-6">
+                    <h2 className="text-2xl font-bold text-white tracking-tight">
+                        Tüm <span className="text-indigo-400">Öneriler</span>
                     </h2>
                     <button
                         onClick={onShowAll}

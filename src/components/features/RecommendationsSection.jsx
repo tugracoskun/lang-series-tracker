@@ -150,26 +150,12 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
     return (
         <div className="mb-14 animate-fade-in-up"> {/* Margin artırıldı (8 -> 14) */}
             {/* Header */}
-            <div className="flex items-start md:items-center gap-3 mb-5 px-2">
-                {levelInfo ? (
-                    <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border shadow-lg ${levelInfo.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                        levelInfo.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
-                            levelInfo.color === 'rose' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
-                                'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
-                        }`}>
-                        {LevelIcon && <LevelIcon size={20} className="drop-shadow-sm" />}
-                    </div>
-                ) : (
-                    <div className="shrink-0 w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg">
-                        <Sparkles size={20} />
-                    </div>
-                )}
-
-                <div className="flex flex-col">
-                    <h3 className="text-lg font-bold text-white leading-tight flex items-center gap-2">
+            <div className="flex items-center justify-between mb-4 px-1">
+                <div className="flex items-center gap-3">
+                    <h3 className="text-base font-bold text-white tracking-wide uppercase flex items-center gap-2">
                         {title}
                         {levelInfo && (
-                            <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider ${levelInfo.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border tracking-tighter ${levelInfo.color === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
                                 levelInfo.color === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400' :
                                     levelInfo.color === 'rose' ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' :
                                         'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
@@ -178,7 +164,8 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
                             </span>
                         )}
                     </h3>
-                    <span className="text-xs text-slate-400 font-medium line-clamp-1">{description}</span>
+                    <div className="h-1 w-1 rounded-full bg-white/20" />
+                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{description}</span>
                 </div>
             </div>
 
@@ -186,11 +173,11 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
             <div className="relative group/row">
                 {/* Left Button & Shadow */}
                 <button
-                    onClick={() => scroll(-300)}
-                    className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-black/90 to-transparent z-20 flex items-center justify-start pl-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+                    onClick={() => scroll(-400)}
+                    className="absolute -left-2 top-0 bottom-0 w-20 bg-gradient-to-r from-[#05070a] via-[#05070a]/60 to-transparent z-30 flex items-center justify-start pl-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
                     aria-label="Sola kaydır"
                 >
-                    <ChevronLeft className="text-white drop-shadow-lg" size={40} />
+                    <ChevronLeft className="text-white drop-shadow-2xl" size={48} />
                 </button>
 
                 {/* Scroll Area */}
@@ -212,11 +199,11 @@ const RecommendationRow = ({ title, description, items, level, onStart, onWatchl
 
                 {/* Right Button & Shadow */}
                 <button
-                    onClick={() => scroll(300)}
-                    className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-black/90 to-transparent z-20 flex items-center justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
+                    onClick={() => scroll(400)}
+                    className="absolute -right-2 top-0 bottom-0 w-20 bg-gradient-to-l from-[#05070a] via-[#05070a]/60 to-transparent z-30 flex items-center justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300"
                     aria-label="Sağa kaydır"
                 >
-                    <ChevronRight className="text-white drop-shadow-lg" size={40} />
+                    <ChevronRight className="text-white drop-shadow-2xl" size={48} />
                 </button>
             </div>
         </div>
@@ -236,16 +223,11 @@ const RecommendationsSection = ({ onStart, onWatchlist, watchlist, smartRecs, is
     }, [smartRecs?.hasPreferences]);
 
     return (
-        <div className="pt-2"> {/* Eski margin ve borderlar kaldırıldı */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="bg-indigo-500/10 p-2 rounded-lg">
-                        <GraduationCap className="text-indigo-400" size={24} />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold text-white">Dizi Önerileri</h2>
-                        <p className="text-slate-400 text-sm">Dil seviyenize ve zevklerinize uygun içerikler.</p>
-                    </div>
+        <div className="pt-2">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-white/5 pb-6">
+                <div className="flex flex-col gap-1">
+                    <h2 className="text-2xl font-bold text-white tracking-tight">Dizi Önerileri</h2>
+                    <p className="text-slate-400 text-sm font-medium">Dil seviyenize ve zevklerinize uygun içerikler.</p>
                 </div>
 
                 {/* Controls & Tabs Container */}

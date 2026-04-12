@@ -78,8 +78,11 @@ function App() {
         // URL'de hash varsa email confirmation callback olabilir
         return globalThis.location.hash.includes('access_token') || globalThis.location.hash.includes('type=');
     });
+    // Use guest user if not logged in to prevent crashes
+    const effectiveUser = user || { id: 'guest', email: 'guest@example.com', user_metadata: { user_name: 'Misafir' } };
+
     // Removed manual sidebar state
-    const appMutations = useAppMutations(user?.id);
+    const appMutations = useAppMutations(effectiveUser.id);
 
     // Track if initial sync is done (for remote data)
     const [initialSyncDone, setInitialSyncDone] = useState(false);
@@ -197,12 +200,12 @@ function App() {
         handleAddNote,
         handleUpdateNote,
         handleDeleteNote
-    } = useNoteManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
+    } = useNoteManager(effectiveUser, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
 
     const {
         handleAddToWatchlist,
         removeFromWatchlist
-    } = useWatchlistManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
+    } = useWatchlistManager(effectiveUser, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction);
 
     const {
         handleSeriesSelect,
@@ -212,7 +215,7 @@ function App() {
         confirmDelete,
         seriesToDelete,
         setSeriesToDelete
-    } = useSeriesManager(user, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction, rotationStrategy);
+    } = useSeriesManager(effectiveUser, { series, userData, history, watchlist, notes }, setDb, appMutations, logAction, rotationStrategy);
 
     const handleStartWatching = async (show) => {
         // Only remove from watchlist if actually in watchlist
@@ -307,98 +310,87 @@ function App() {
                 />
             )}
 
-            {/* Mandatory Login Check */}
-            {!user && !isAuthLoading && !showEmailConfirmation && (
-                <LoginRequired onShowAuth={() => setShowAuthModal(true)} />
-            )}
+            <AnimatePresence>
+                {loadingState && <LoadingScreen key="loader" status={loadingState} />}
+                {seriesToDelete && (
+                    <ConfirmationModal
+                        key="confirm-modal"
+                        isOpen={!!seriesToDelete}
+                        title="Diziyi Sil"
+                        message="Bu diziyi ve tüm ilerlemeni silmek istediğine emin misin? Bu işlem geri alınamaz."
+                        onConfirm={confirmDelete}
+                        onCancel={() => setSeriesToDelete(null)}
+                    />
+                )}
+            </AnimatePresence>
+            <MainLayout>
+                <Routes>
+                    <Route path="/" element={
+                        <Dashboard
+                            onSeriesClick={(id) => navigate(`/series/${id}`)}
+                            onAddClick={() => setAddModalOpen(true)}
+                            onDeleteSeries={handleDelete}
+                            onStartWatching={handleStartWatching}
+                            onAddToWatchlist={handleAddToWatchlist}
+                        />
+                    } />
 
-            {user && (
-                <>
-                    <AnimatePresence>
-                        {loadingState && <LoadingScreen key="loader" status={loadingState} />}
-                        {seriesToDelete && (
-                            <ConfirmationModal
-                                key="confirm-modal"
-                                isOpen={!!seriesToDelete}
-                                title="Diziyi Sil"
-                                message="Bu diziyi ve tüm ilerlemeni silmek istediğine emin misin? Bu işlem geri alınamaz."
-                                onConfirm={confirmDelete}
-                                onCancel={() => setSeriesToDelete(null)}
+                    <Route path="/series/:seriesId" element={
+                        <SeriesDetail
+                            seriesList={series}
+                            data={userData}
+                            onUpdate={handleUpdate}
+                            onSeriesSettingsUpdate={handleSeriesSettingsUpdate}
+                            onAddNote={handleAddNote}
+                            onDeleteNote={handleDeleteNote}
+                        />
+                    } />
+
+                    <Route path="/vocab" element={
+                        <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                            <VocabularyPage />
+                        </div>
+                    } />
+
+                    <Route path="/flashcards" element={
+                        <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                            <FlashcardsPage />
+                        </div>
+                    } />
+
+                    <Route path="/notes" element={
+                        <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
+                            <NotesPage
+                                onAdd={handleAddNote}
+                                onUpdate={handleUpdateNote}
+                                onDelete={handleDeleteNote}
                             />
-                        )}
-                    </AnimatePresence>
-                    <MainLayout>
-                        <Routes>
-                            <Route path="/" element={
-                                <Dashboard
-                                    onSeriesClick={(id) => navigate(`/series/${id}`)}
-                                    onAddClick={() => setAddModalOpen(true)}
-                                    // onDeleteSeries needs id param now if not passed directly. Dashboard passes (e, id) -> onDeleteSeries(e, id)
-                                    onDeleteSeries={handleDelete}
-                                    onStartWatching={handleStartWatching}
-                                    onAddToWatchlist={handleAddToWatchlist}
-                                />
-                            } />
+                        </div>
+                    } />
 
-                            <Route path="/series/:seriesId" element={
-                                <SeriesDetail
-                                    seriesList={series}
-                                    data={userData}
-                                    onUpdate={handleUpdate}
-                                    onSeriesSettingsUpdate={handleSeriesSettingsUpdate}
-                                    onAddNote={handleAddNote}
-                                    onDeleteNote={handleDeleteNote}
-                                />
-                            } />
+                    <Route path="/watchlist" element={
+                        <WatchlistPage
+                            onStartWatching={handleStartWatching}
+                            onRemove={removeFromWatchlist}
+                            onAddClick={() => setAddModalOpen(true)}
+                        />
+                    } />
 
-                            <Route path="/vocab" element={
-                                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-                                    <VocabularyPage />
-                                </div>
-                            } />
+                    <Route path="/history" element={
+                        <ActivityHistoryPage />
+                    } />
 
-                            <Route path="/flashcards" element={
-                                <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-                                    <FlashcardsPage />
-                                </div>
-                            } />
+                    <Route path="/settings" element={
+                        <SettingsPage />
+                    } />
 
-                            <Route path="/notes" element={
-                                <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
-                                    <NotesPage
-                                        onAdd={handleAddNote}
-                                        onUpdate={handleUpdateNote}
-                                        onDelete={handleDeleteNote}
-                                    />
-                                </div>
-                            } />
+                    <Route path="/trakt-callback" element={
+                        <TraktCallback />
+                    } />
 
-                            <Route path="/watchlist" element={
-                                <WatchlistPage
-                                    onStartWatching={handleStartWatching}
-                                    onRemove={removeFromWatchlist}
-                                    onAddClick={() => setAddModalOpen(true)}
-                                />
-                            } />
-
-                            <Route path="/history" element={
-                                <ActivityHistoryPage />
-                            } />
-
-                            <Route path="/settings" element={
-                                <SettingsPage />
-                            } />
-
-                            <Route path="/trakt-callback" element={
-                                <TraktCallback />
-                            } />
-
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
-
-                    </MainLayout>
-                </>
-            )}
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </MainLayout>
         </div>
     );
 }
