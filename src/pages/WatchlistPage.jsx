@@ -5,40 +5,40 @@ import { useAppStore } from '../store/useAppStore';
 const WatchlistPage = ({ onStartWatching, onRemove, onAddClick }) => {
     const { watchlist } = useAppStore();
     return (
-        <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
-            <header className="flex justify-between items-end mb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 relative z-10">
+            <header className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-4xl font-display font-bold text-white mb-2 flex items-center gap-3">
-                        <Bookmark className="text-indigo-400" size={32} />
+                    <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-1 flex items-center gap-3">
+                        <Bookmark className="text-indigo-400" size={24} />
                         İzleme Listesi
                     </h1>
-                    <p className="text-slate-400 text-lg">Daha sonra izlemeyi planladığınız içerikler.</p>
+                    <p className="text-slate-500 text-sm">Daha sonra izlemeyi planladığınız içerikler.</p>
                 </div>
                 <button
                     onClick={onAddClick}
-                    className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all flex items-center gap-2 border border-white/10"
+                    className="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all flex items-center gap-2 border border-white/10 text-sm"
                 >
-                    <Plus size={20} />
+                    <Plus size={18} />
                     Listeye Ekle
                 </button>
             </header>
 
             {watchlist.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center border border-white/5 rounded-[2.5rem] glass-panel">
-                    <div className="w-24 h-24 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-6 shadow-2xl">
-                        <Bookmark size={40} className="text-slate-600" />
+                <div className="flex flex-col items-center justify-center py-16 text-center border border-white/5 rounded-2xl glass-panel">
+                    <div className="w-20 h-20 rounded-full bg-white/5 border border-white/5 flex items-center justify-center mb-4 shadow-2xl">
+                        <Bookmark size={32} className="text-slate-600" />
                     </div>
-                    <h3 className="text-2xl font-display font-bold text-white mb-2">Listeniz Bos</h3>
-                    <p className="text-slate-400 max-w-md mx-auto mb-8">Henüz izleme listenize bir dizi eklemediniz.</p>
+                    <h3 className="text-xl font-display font-bold text-white mb-2">Listeniz Boş</h3>
+                    <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">Henüz izleme listenize bir dizi eklemediniz.</p>
                     <button
                         onClick={onAddClick}
-                        className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white font-bold rounded-2xl transition-all shadow-2xl shadow-indigo-500/20"
+                        className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white font-bold rounded-xl transition-all shadow-xl shadow-indigo-500/20"
                     >
-                        Ilk Dizini Ekle
+                        İlk Dizini Ekle
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {watchlist.map(show => (
                         <div key={show.id} className="glass-panel group relative aspect-[2/3] rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-all">
                             {(show.image?.original || show.image?.medium) ? (

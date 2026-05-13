@@ -44,23 +44,23 @@ const ActivityHistoryPage = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in relative z-10 min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative z-10 min-h-screen">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-12">
+            <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => navigate('/')}
-                    className="p-3 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-slate-300 hover:text-white"
+                    className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 transition-colors text-slate-300 hover:text-white"
                 >
-                    <ArrowLeft size={24} />
+                    <ArrowLeft size={20} />
                 </button>
                 <div>
-                    <h1 className="text-4xl font-display font-bold text-white mb-2 ml-4">Aktivite Geçmişi</h1>
-                    <p className="text-slate-400 ml-4 font-light">Tüm öğrenme ve izleme hareketleriniz</p>
+                    <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-1">Aktivite Geçmişi</h1>
+                    <p className="text-slate-500 text-sm">Tüm öğrenme ve izleme hareketleriniz</p>
                 </div>
             </div>
 
             {/* Timeline Container - Strictly Left Aligned */}
-            <div className="relative border-l border-white/10 ml-4 md:ml-8 space-y-12 pl-8 md:pl-12 pb-20">
+            <div className="relative border-l border-white/10 ml-4 md:ml-6 space-y-8 pl-6 md:pl-10 pb-12">
                 {Object.entries(groupedHistory).map(([date, items], groupIndex) => (
                     <div key={date} className="relative animate-fade-in-up" style={{ animationDelay: `${groupIndex * 100}ms` }}>
 
@@ -70,7 +70,7 @@ const ActivityHistoryPage = () => {
                         </div>
 
                         {/* Content Card (Strictly on the right of the line) */}
-                        <div className="w-full glass-panel p-8 rounded-[2rem] border-white/5 shadow-2xl transition-all duration-300 group">
+                        <div className="w-full glass-panel p-5 rounded-2xl border-white/5 shadow-xl transition-all duration-300 group">
                             <div className="flex items-center gap-3 mb-4 border-b border-white/5 pb-3">
                                 <span className="text-indigo-400 font-bold font-display text-sm uppercase tracking-wider">{date}</span>
                                 <span className="bg-white/5 text-slate-500 text-[10px] px-2 py-0.5 rounded-full">{items.length} İşlem</span>

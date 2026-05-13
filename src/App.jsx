@@ -6,6 +6,7 @@ import { useAppStore } from './store/useAppStore';
 import { toast } from 'sonner';
 import { AnimatePresence } from 'framer-motion';
 import SeriesDetail from './pages/SeriesDetail';
+import PageTransition from './components/ui/PageTransition';
 
 import VocabularyPage from './pages/VocabularyPage';
 import FlashcardsPage from './pages/FlashcardsPage';
@@ -324,8 +325,10 @@ function App() {
                 )}
             </AnimatePresence>
             <MainLayout>
-                <Routes>
+                <AnimatePresence mode="wait">
+                <Routes location={location} key={location.pathname}>
                     <Route path="/" element={
+                        <PageTransition>
                         <Dashboard
                             onSeriesClick={(id) => navigate(`/series/${id}`)}
                             onAddClick={() => setAddModalOpen(true)}
@@ -333,9 +336,11 @@ function App() {
                             onStartWatching={handleStartWatching}
                             onAddToWatchlist={handleAddToWatchlist}
                         />
+                        </PageTransition>
                     } />
 
                     <Route path="/series/:seriesId" element={
+                        <PageTransition>
                         <SeriesDetail
                             seriesList={series}
                             data={userData}
@@ -344,44 +349,51 @@ function App() {
                             onAddNote={handleAddNote}
                             onDeleteNote={handleDeleteNote}
                         />
+                        </PageTransition>
                     } />
 
                     <Route path="/vocab" element={
-                        <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                        <PageTransition className="max-w-7xl mx-auto px-6 py-6 relative z-10">
                             <VocabularyPage />
-                        </div>
+                        </PageTransition>
                     } />
 
                     <Route path="/flashcards" element={
-                        <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in relative z-10">
+                        <PageTransition className="max-w-7xl mx-auto px-6 py-6 relative z-10">
                             <FlashcardsPage />
-                        </div>
+                        </PageTransition>
                     } />
 
                     <Route path="/notes" element={
-                        <div className="max-w-7xl mx-auto px-6 py-6 animate-fade-in relative z-10">
+                        <PageTransition className="max-w-7xl mx-auto px-6 py-4 relative z-10">
                             <NotesPage
                                 onAdd={handleAddNote}
                                 onUpdate={handleUpdateNote}
                                 onDelete={handleDeleteNote}
                             />
-                        </div>
+                        </PageTransition>
                     } />
 
                     <Route path="/watchlist" element={
+                        <PageTransition>
                         <WatchlistPage
                             onStartWatching={handleStartWatching}
                             onRemove={removeFromWatchlist}
                             onAddClick={() => setAddModalOpen(true)}
                         />
+                        </PageTransition>
                     } />
 
                     <Route path="/history" element={
+                        <PageTransition>
                         <ActivityHistoryPage />
+                        </PageTransition>
                     } />
 
                     <Route path="/settings" element={
+                        <PageTransition>
                         <SettingsPage />
+                        </PageTransition>
                     } />
 
                     <Route path="/trakt-callback" element={
@@ -390,6 +402,7 @@ function App() {
 
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
+                </AnimatePresence>
             </MainLayout>
         </div>
     );

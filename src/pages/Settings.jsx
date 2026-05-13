@@ -744,21 +744,21 @@ const SettingsPage = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto px-6 py-8">
-            <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                    <Settings size={24} className="text-white" />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <Settings size={20} className="text-white" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-display font-bold text-white">Ayarlar</h1>
-                    <p className="text-slate-400">Uygulama tercihlerinizi yönetin</p>
+                    <h1 className="text-xl font-display font-bold text-white">Ayarlar</h1>
+                    <p className="text-slate-500 text-sm">Uygulama tercihlerinizi yönetin</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Sidebar Navigation */}
                 <div className="lg:col-span-1">
-                    <nav className="glass-panel rounded-3xl border-white/10 p-2 space-y-1 sticky top-4">
+                    <nav className="glass-panel rounded-2xl border-white/10 p-2 space-y-0.5 sticky top-4">
                         {sections.map(section => {
                             const Icon = section.icon;
                             const isActive = activeSection === section.id;
@@ -787,7 +787,7 @@ const SettingsPage = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="glass-panel rounded-3xl border-white/10 p-8"
+                        className="glass-panel rounded-2xl border-white/10 p-6"
                     >
                         {renderSection()}
                     </motion.div>

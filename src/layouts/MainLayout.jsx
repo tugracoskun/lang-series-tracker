@@ -16,7 +16,7 @@ const MainLayout = ({ children }) => {
             <EmailVerificationBanner user={user} />
 
             {/* Main Content - Desktop'ta sidebar için padding */}
-            <div className={`transition-all duration-300 min-h-screen relative z-10 ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
+            <div className={`min-h-screen relative z-10 transition-[padding] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'}`}>
                 {children}
             </div>
         </>

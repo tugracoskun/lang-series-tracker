@@ -41,17 +41,17 @@ const VocabularyPage = () => {
     return (
         <div className="pb-20">
             {/* Header */}
-            <div className="flex items-center gap-6 mb-12">
+            <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => navigate('/')}
-                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
+                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"
                     aria-label="Geri Dön"
                 >
-                    <ArrowLeft className="text-slate-200" size={20} />
+                    <ArrowLeft className="text-slate-200" size={18} />
                 </button>
                 <div>
-                    <h1 className="text-4xl font-display font-bold text-white">Kelimelerim</h1>
-                    <p className="text-slate-400 mt-1">Toplam {allWords.length} kelime koleksiyonda</p>
+                    <h1 className="text-2xl sm:text-3xl font-display font-bold text-white">Kelimelerim</h1>
+                    <p className="text-slate-500 text-sm mt-0.5">Toplam {allWords.length} kelime koleksiyonda</p>
                 </div>
             </div>
 

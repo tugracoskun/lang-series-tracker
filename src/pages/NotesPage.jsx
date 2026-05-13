@@ -71,9 +71,9 @@ const NotesPage = ({ onAdd, onUpdate, onDelete }) => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-8rem)] gap-6">
+        <div className="flex h-[calc(100vh-6rem)] gap-4">
             {/* Sidebar / Notebook Shelf */}
-            <div className="w-64 flex flex-col gap-4">
+            <div className="w-56 flex flex-col gap-3">
                 <div className="glass-panel p-4 rounded-2xl flex-1 flex flex-col overflow-hidden">
                     <h2 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-4 px-2">Defterler</h2>
                     <div className="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-2">
@@ -130,7 +130,7 @@ const NotesPage = ({ onAdd, onUpdate, onDelete }) => {
                             {/* Header & Filters */}
                             <div className="flex justify-between items-center mb-6">
                                 <div>
-                                    <h2 className="text-3xl font-display font-bold text-white mb-1">{activeNotebookName}</h2>
+                                    <h2 className="text-2xl font-display font-bold text-white mb-0.5">{activeNotebookName}</h2>
                                     <p className="text-slate-400 text-sm">{filteredNotes.length} not bulundu</p>
                                 </div>
                                 <div className="flex gap-3">

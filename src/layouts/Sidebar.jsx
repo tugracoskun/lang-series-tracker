@@ -94,7 +94,7 @@ const Sidebar = () => {
     // Desktop: Sabit sidebar
     if (isDesktop) {
         return (
-            <div className={`fixed top-0 left-0 h-full z-40 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-72'}`}>
+            <div className={`fixed top-0 left-0 h-full z-40 transition-[width] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${sidebarCollapsed ? 'w-20' : 'w-72'}`}>
                 {/* Background */}
                 <div className="absolute inset-0 bg-[#05070a]/40 backdrop-blur-3xl border-r border-white/5" />
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Check, ChevronDown, Info, Menu, BookOpen, RotateCcw, Lock, Clock, AlertCircle } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import EpisodeModal from '../components/modals/EpisodeModal';
 import { useAppStore } from '../store/useAppStore';
@@ -316,7 +317,7 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
     }
 
     return (
-        <div className="animate-fade-in pb-32 relative min-h-screen">
+        <div className="pb-20 relative min-h-screen">
             <EpisodeModal
                 isOpen={!!selectedEpisode}
                 onClose={() => setSelectedEpisode(null)}
@@ -341,8 +342,8 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
             </div>
 
             <div className="relative z-10">
-                <div className="sticky top-0 z-30 bg-[#000]/80 backdrop-blur-xl border-b border-white/5 shadow-2xl transition-all duration-300">
-                    <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+                <div className="sticky top-0 z-30 bg-[#000]/80 backdrop-blur-xl border-b border-white/5 shadow-xl transition-all duration-300">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-6 flex-1">
                             <button onClick={() => navigate('/')} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0" aria-label="Geri">
                                 <ArrowLeft className="text-slate-200" size={20} />
@@ -416,7 +417,7 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
                     </div>
                 </div>
 
-                <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-4">
                     {series.schedule.map(seasonData => {
                         const isExpanded = expandedSeason === seasonData.season;
                         const currentTourData = seasonData.tours.find(t => t.id === activeTour);
@@ -453,7 +454,13 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
                                 </button>
 
                                 {isExpanded && (
-                                    <div className="border-t border-white/5 bg-black/20">
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                                        className="border-t border-white/5 bg-black/20 overflow-hidden"
+                                    >
                                         <div className="flex border-b border-white/5">
                                             {[1, 2, 3].map(tId => {
                                                 const tourObj = seasonData.tours.find(t => t.id === tId);
@@ -513,7 +520,7 @@ const SeriesDetail = ({ seriesList, data: allUserData, onUpdate, onSeriesSetting
                                                 ))}
                                             </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )}
                             </div>
                         );
