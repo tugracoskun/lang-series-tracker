@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Menu, Search, Loader, Sparkles, GraduationCap, CheckCircle, ArrowRight, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Menu, Search, Loader, Sparkles, GraduationCap, CheckCircle, ArrowRight, ChevronRight, BookOpen, Flame, TrendingUp, Play, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
 import RecommendationsSection from '../components/features/RecommendationsSection';
@@ -56,6 +56,8 @@ const Dashboard = ({
         let totalEpisodes = 0;
         let completedEpisodes = 0;
         let totalSeries = series.length;
+        let totalVocabulary = 0;
+        let totalHoursWatched = 0;
 
         series.forEach(s => {
             const total = s.schedule
@@ -65,14 +67,21 @@ const Dashboard = ({
                 ?.filter(d => d.epId).length || 0;
 
             const completed = Object.keys(userData[s.id]?.completed || {}).length;
+            const vocabEntries = Object.values(userData[s.id]?.vocabulary || {});
+            const vocabCount = vocabEntries.reduce((sum, words) => sum + (Array.isArray(words) ? words.length : 0), 0);
+
             totalEpisodes += total;
             completedEpisodes += completed;
+            totalVocabulary += vocabCount;
+            totalHoursWatched += completed * 0.7; // ~42 min per episode
         });
 
         return {
             totalSeries,
             totalEpisodes,
             completedEpisodes,
+            totalVocabulary,
+            totalHoursWatched: Math.round(totalHoursWatched),
             overallProgress: totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0
         };
     }, [series, userData]);
@@ -111,66 +120,105 @@ const Dashboard = ({
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 relative z-10">
 
-                {/* Colorful Header */}
+                {/* Professional Header */}
                 <motion.header
-                    initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                     className="mb-5"
                 >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
                         <div>
-                            <p className="text-slate-500 text-sm font-medium mb-1">{getGreeting()}</p>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                                {userName ? `${userName}, ` : ''}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+                            <div className="flex items-center gap-2.5 mb-1.5">
+                                <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">{getGreeting()}</p>
+                                {cefrLevel && (
+                                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 uppercase tracking-wider">
+                                        {cefrLevel}
+                                    </span>
+                                )}
+                            </div>
+                            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                                {userName ? <>{userName}<span className="text-slate-600 font-normal mx-1.5">·</span></> : ''}
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
                                     izlemeye devam et
                                 </span>
                             </h1>
                         </div>
 
-                        {/* Quick Add Button */}
                         <button
                             onClick={onAddClick}
-                            className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-indigo-500/25"
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] text-white text-sm font-medium rounded-lg transition-all border border-white/10 hover:border-indigo-500/40"
                         >
-                            <Plus size={18} />
+                            <Plus size={16} />
                             <span>Dizi Ekle</span>
                         </button>
                     </div>
                 </motion.header>
 
-                {/* Inline Stats */}
+                {/* Rich Stats Bar */}
                 {series.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="flex items-center gap-6 mb-5 text-sm border-b border-white/5 pb-4"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.08, duration: 0.3 }}
+                        className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5"
                     >
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                            <span>{stats.totalSeries} dizi</span>
+                        <div className="glass-panel rounded-xl px-4 py-3 flex items-center gap-3 border-white/5">
+                            <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center flex-shrink-0">
+                                <Play size={16} className="text-indigo-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-lg font-bold text-white leading-none">{stats.totalSeries}</p>
+                                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Aktif Dizi</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                            <span>%{stats.overallProgress} tamamlandı</span>
+                        <div className="glass-panel rounded-xl px-4 py-3 flex items-center gap-3 border-white/5">
+                            <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                                <Eye size={16} className="text-emerald-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-lg font-bold text-white leading-none">{stats.completedEpisodes}<span className="text-xs text-slate-600 font-normal">/{stats.totalEpisodes}</span></p>
+                                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Bölüm</p>
+                            </div>
                         </div>
-                        <div className="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
-                                style={{ width: `${stats.overallProgress}%` }}
-                            />
+                        <div className="glass-panel rounded-xl px-4 py-3 flex items-center gap-3 border-white/5">
+                            <div className="w-9 h-9 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                                <BookOpen size={16} className="text-purple-400" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-lg font-bold text-white leading-none">{stats.totalVocabulary}</p>
+                                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider mt-0.5">Kelime</p>
+                            </div>
+                        </div>
+                        <div className="glass-panel rounded-xl px-4 py-3 border-white/5">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">İlerleme</span>
+                                <span className="text-sm font-bold text-white">%{stats.overallProgress}</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${stats.overallProgress}%` }}
+                                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                                    className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-400 rounded-full"
+                                />
+                            </div>
                         </div>
                     </motion.div>
                 )}
 
                 {/* Series Grid */}
                 {series.length > 0 ? (
+                    <>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Dizilerim</h2>
+                        <span className="text-[10px] text-slate-600 font-mono">{stats.completedEpisodes} / {stats.totalEpisodes} bölüm izlendi</span>
+                    </div>
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
                     >
                         {series.map((s, index) => (
                             <SeriesCard
@@ -187,14 +235,15 @@ const Dashboard = ({
                         <motion.button
                             variants={itemVariants}
                             onClick={onAddClick}
-                            className="group aspect-[3/4] rounded-2xl border-2 border-dashed border-white/10 hover:border-indigo-500/50 flex flex-col items-center justify-center gap-3 transition-all hover:bg-white/[0.02]"
+                            className="group aspect-[3/4] rounded-2xl border border-dashed border-white/10 hover:border-indigo-500/40 flex flex-col items-center justify-center gap-2 transition-all hover:bg-white/[0.02]"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all">
-                                <Plus size={24} className="text-indigo-400" />
+                            <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/20 transition-all">
+                                <Plus size={18} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
                             </div>
-                            <span className="text-slate-500 group-hover:text-white font-medium transition-colors">Yeni Dizi Ekle</span>
+                            <span className="text-slate-600 group-hover:text-slate-400 text-xs font-medium transition-colors">Dizi Ekle</span>
                         </motion.button>
                     </motion.div>
+                    </>
                 ) : (
                     <InitialSetupView
                         onAddClick={onAddClick}
@@ -246,6 +295,8 @@ const SeriesCard = ({ series: s, userData, onSeriesClick, onDeleteSeries, index 
     const completed = Object.keys(userData[s.id]?.completed || {}).length;
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
     const difficulty = estimateDifficulty(s);
+    const vocabCount = Object.values(userData[s.id]?.vocabulary || {}).reduce((sum, words) => sum + (Array.isArray(words) ? words.length : 0), 0);
+    const primaryGenre = s.genres?.[0];
 
     return (
         <motion.div
@@ -254,7 +305,7 @@ const SeriesCard = ({ series: s, userData, onSeriesClick, onDeleteSeries, index 
         >
             <button
                 onClick={() => onSeriesClick(s.id)}
-                className="w-full aspect-[3/4] rounded-2xl overflow-hidden relative outline-none"
+                className="w-full aspect-[3/4] rounded-2xl overflow-hidden relative outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 border border-white/5 hover:border-indigo-500/30 transition-all duration-300"
             >
                 {/* Background Image */}
                 {s.image?.original && (
@@ -264,51 +315,75 @@ const SeriesCard = ({ series: s, userData, onSeriesClick, onDeleteSeries, index 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             alt={s.name}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
                     </div>
                 )}
 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 p-4 flex flex-col justify-between">
-                    {/* Top Actions */}
+                <div className="absolute inset-0 p-3.5 flex flex-col justify-between">
+                    {/* Top Row */}
                     <div className="flex justify-between items-start">
-                        <span className={`liquid-badge ${getDifficultyBadgeClass(difficulty.id)} opacity-0 group-hover:opacity-100 transition-opacity`}>
-                            {difficulty.text}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded backdrop-blur-md border uppercase tracking-widest ${getDifficultyBadgeClass(difficulty.id)}`}>
+                                {difficulty.text}
+                            </span>
+                            {primaryGenre && (
+                                <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded bg-black/40 backdrop-blur-md text-slate-300 border border-white/10 uppercase tracking-wide">
+                                    {primaryGenre}
+                                </span>
+                            )}
+                        </div>
                         <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); onDeleteSeries(e, s.id); }}
-                            className="p-2 bg-black/40 backdrop-blur-md rounded-xl opacity-0 group-hover:opacity-100 hover:bg-rose-500 hover:text-white transition-all border border-white/10"
+                            className="p-1.5 bg-black/40 backdrop-blur-md rounded-lg opacity-0 group-hover:opacity-100 hover:bg-rose-500 hover:text-white transition-all border border-white/10"
                             aria-label="Diziyi Sil"
                         >
-                            <Trash2 size={14} />
+                            <Trash2 size={12} />
                         </button>
                     </div>
 
                     {/* Bottom Info */}
                     <div>
-                        <h3 className="text-xl font-bold text-white mb-3 text-left line-clamp-2">{s.name}</h3>
+                        <h3 className="text-base font-bold text-white mb-2 text-left line-clamp-2 leading-snug">{s.name}</h3>
+
+                        {/* Micro Stats Row */}
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[9px] text-slate-300 font-mono bg-white/10 backdrop-blur-sm px-1.5 py-0.5 rounded">
+                                {completed}/{total}
+                            </span>
+                            {vocabCount > 0 && (
+                                <span className="text-[9px] text-purple-300 font-mono bg-purple-500/15 backdrop-blur-sm px-1.5 py-0.5 rounded border border-purple-500/20">
+                                    {vocabCount} kelime
+                                </span>
+                            )}
+                            {s.rating?.average && (
+                                <span className="text-[9px] text-amber-300 font-mono bg-amber-500/15 backdrop-blur-sm px-1.5 py-0.5 rounded border border-amber-500/20 ml-auto">
+                                    ★ {s.rating.average}
+                                </span>
+                            )}
+                        </div>
 
                         {/* Progress */}
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-slate-400">{completed} / {total} bölüm</span>
-                                <span className="text-white font-bold">%{pct}</span>
+                        <div className="space-y-1">
+                            <div className="flex justify-between items-center text-[10px]">
+                                <span className="text-slate-400 font-medium">İlerleme</span>
+                                <span className="text-white font-bold tabular-nums">%{pct}</span>
                             </div>
-                            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${pct}%` }}
-                                    transition={{ duration: 1, ease: "easeOut", delay: index * 0.1 }}
-                                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
+                                    transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.06 }}
+                                    className={`h-full rounded-full ${pct === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'}`}
                                 />
                             </div>
                         </div>
 
-                        {/* Hover Action */}
-                        <div className="mt-3 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                            <div className="flex items-center justify-center gap-2 py-2.5 bg-white/10 backdrop-blur-md rounded-xl text-white text-sm font-medium">
-                                <ArrowRight size={14} />
+                        {/* Hover CTA */}
+                        <div className="mt-2 opacity-0 group-hover:opacity-100 transform translate-y-1 group-hover:translate-y-0 transition-all duration-200">
+                            <div className="flex items-center justify-center gap-1.5 py-1.5 bg-white/10 backdrop-blur-md rounded-lg text-white text-xs font-medium">
+                                <ArrowRight size={12} />
                                 <span>Görüntüle</span>
                             </div>
                         </div>
